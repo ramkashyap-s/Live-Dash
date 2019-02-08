@@ -5,7 +5,7 @@ server = 'irc.chat.twitch.tv'
 port = 6667
 nickname = 'srk3141'
 token = 'oauth:stohe9j4evimw08quy46nm5htphllu'
-channels = ["#deamonmachine", "#clawontwitch"]
+channels = ["#moonmoon_ow", "#clawontwitch"]
 #channels: rockitsage, deamonmachine, phantomcode32, #moondye7
 import socket
 
