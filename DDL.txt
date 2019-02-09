@@ -1,0 +1,17 @@
+----DDL----
+-- create metrics table
+CREATE TABLE metrics(metric_id serial PRIMARY KEY, metric_name VARCHAR (50) UNIQUE NOT NULL, metric_desc VARCHAR (255) NOT NULL); 
+-- create channels table
+CREATE TABLE channels(channel_id serial PRIMARY KEY, channel_name VARCHAR (50) UNIQUE NOT NULL);
+
+
+----DML-----
+INSERT INTO channels (channel_id , channel_name) VALUES (DEFAULT, '#disguisedtoast');
+INSERT INTO channels (channel_id , channel_name) VALUES (DEFAULT, '#neuro');
+INSERT INTO channels (channel_id , channel_name) VALUES (DEFAULT, '#quarterjade');
+INSERT INTO channels (channel_id , channel_name) VALUES (DEFAULT, '#eevisu');
+---------
+INSERT INTO metrics (metric_id , metric_name, metric_desc) VALUES (DEFAULT, 'num_comments', 'number of comments in the time window');
+INSERT INTO metrics (metric_id , metric_name, metric_desc) VALUES (DEFAULT, 'num_interacting_viewers', 'number of users posting comments in the time window');
+INSERT INTO metrics (metric_id , metric_name, metric_desc) VALUES (DEFAULT, 'sentiment', 'sentiment of comments in the time window');
+------------
