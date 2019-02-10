@@ -17,13 +17,13 @@ class TwitchBot:
         self.irc = irc_.irc(config)
         self.socket = self.irc.get_irc_socket_object()
         self.twitchtopic_producer = KafkaProducer(bootstrap_servers=config['kafka_config'],
-                                                api_version=(0, 10, 1),
+                                                api_version=(0, 10, 1), key_serializer=lambda m:str.encode(m),
                                                 value_serializer=lambda m: json.dumps(m).encode('utf-8'))
 
-    def on_send_success(record_metadata):
-        print(record_metadata.topic)
-        print(record_metadata.partition)
-        print(record_metadata.offset)
+    # def on_send_success(record_metadata):
+    #     print(record_metadata.topic)
+    #     print(record_metadata.partition)
+    #     print(record_metadata.offset)
 
     def run(self):
         irc = self.irc
@@ -47,11 +47,12 @@ class TwitchBot:
             if irc.check_for_message(data):
                 message_dict = irc.get_message(data)
                 channel = message_dict['channel']
+                print(message_dict)
                 # message = message_dict['message']
                 # username = message_dict['username']
                 # self.chat_topic.send('new_chatmessage', str.encode(json.dumps(message_dict)))
-                self.twitchtopic_producer.send('twitch-message', key=str.encode(channel), value=message_dict)\
-                    .add_callback(self.on_send_success)
+                self.twitchtopic_producer.send('twitch-message', key=channel, value=message_dict)
+                    # .add_callback(self.on_send_success)
 
     #
     # def on_send_error(excp):

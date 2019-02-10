@@ -8,11 +8,11 @@ config = {
     'username': 'srk3141', # your twitch username
     'oauth_password': 'oauth:stohe9j4evimw08quy46nm5htphllu',  # get this from http://twitchapps.com/tmi/
 
-    # channel to join
-    'channels': ['clawontwitch', 'moonmoon_ow'],
+    # channel to join '#clawontwitch', #moonmoon_ow, #neuro, #rajjpatel, #disguisedtoast, #somagreen
+    'channels': ['#ggria', '#jenna'],
 
     # if set to true will display any data received
-    'debug': True,
+    'debug': False,
 
     # if set to true will log all messages from all channels
     # todo
