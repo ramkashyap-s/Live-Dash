@@ -9,7 +9,7 @@ config = {
     'oauth_password': 'oauth:stohe9j4evimw08quy46nm5htphllu',  # get this from http://twitchapps.com/tmi/
 
     # channel to join '#clawontwitch', #moonmoon_ow, #neuro, #rajjpatel, #disguisedtoast, #somagreen
-    'channels': ['#ggria', '#jenna'],
+    'channels': ['#trainwreckstv', '#macaiyla', '#therealshookon3'],
 
     # if set to true will display any data received
     'debug': False,

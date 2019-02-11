@@ -1,13 +1,18 @@
 import logging
 from emoji import demojize
+from kafka import KafkaProducer
+import json
+from time import gmtime, strftime
+from src.config.conf import *
 
 server = 'irc.chat.twitch.tv'
 port = 6667
 nickname = 'srk3141'
 token = 'oauth:stohe9j4evimw08quy46nm5htphllu'
-channels = ["#deamonmachine", "#clawontwitch"]
+channels = ['#trainwreckstv', '#macaiyla', '#therealshookon3']
 #channels: rockitsage, deamonmachine, phantomcode32, #moondye7
 import socket
+from time import gmtime, strftime
 
 sock = socket.socket()
 sock.connect((server, port))
@@ -24,7 +29,11 @@ for channel in channels:
 
 # if (sock.recv(2048).decode('utf-8')):
 #     print('Login successful.')
+twitchtopic_producer = KafkaProducer(bootstrap_servers=config['kafka_config'],
+                                          api_version=(0, 10, 2), key_serializer=lambda m: str.encode(m),
+                                          value_serializer=lambda m: json.dumps(m).encode('utf-8'))
 
+message_count = 0
 while True:
     resp = sock.recv(2048).decode('utf-8')
 
@@ -33,5 +42,7 @@ while True:
 
     elif len(resp) > 0:
         resp_clean = resp.strip()
-        # print(resp_clean)
-        print(demojize(resp_clean))
+        message_count += 1
+        # print(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + demojize(resp_clean) + "messages:" + str(message_count))
+        twitchtopic_producer.send('twitch-message', key=channel, value=resp_clean)
+
