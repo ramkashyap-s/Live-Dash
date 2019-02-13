@@ -31,9 +31,10 @@ class TwitchBot:
         sock = self.socket
         config = self.config
 
+        # try:
         while True:
 
-            data = sock.recv(config['socket_buffer_size']).decode('utf-8',errors='ignore')
+            data = sock.recv(config['socket_buffer_size']).decode('utf-8', errors='ignore')
 
             if len(data) == 0:
                 print('Connection was lost, reconnecting.')
@@ -57,7 +58,11 @@ class TwitchBot:
                 # username = message_dict['username']
                 # self.chat_topic.send('new_chatmessage', str.encode(json.dumps(message_dict)))
                 self.twitchtopic_producer.send('twitch-message', key=channel, value=message_dict)
-                    # .add_callback(self.on_send_success)
+                # .add_callback(self.on_send_success)
+        # except KeyboardInterrupt:
+        #     pass
+
+
 
     #
     # def on_send_error(excp):

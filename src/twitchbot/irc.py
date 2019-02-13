@@ -59,9 +59,9 @@ class irc:
             sys.exit()
 
         self.sock.settimeout(None)
-        self.sock.send((f"USER %s\r\n"% self.config['username']).encode('utf-8'))
-        self.sock.send((f"PASS %s\r\n"% self.config['oauth_password']).encode('utf-8'))
-        self.sock.send((f"NICK %s\r\n"% self.config['username']).encode('utf-8'))
+        self.sock.send(("USER " + self.config['username'] + "\n").encode('utf-8'))
+        self.sock.send(("PASS " + self.config['oauth_password'] + "\n").encode('utf-8'))
+        self.sock.send(("NICK " + self.config['username'] + "\n").encode('utf-8'))
 
         # ToDo check if authentication is successful
         # if self.check_login_status(self.sock.recv(2048).decode('utf-8')):

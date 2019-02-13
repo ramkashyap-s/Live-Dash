@@ -8,8 +8,9 @@ config = {
     'username': 'srk3141', # your twitch username
     'oauth_password': 'oauth:stohe9j4evimw08quy46nm5htphllu',  # get this from http://twitchapps.com/tmi/
 
-    # channel to join '#clawontwitch', #moonmoon_ow, #neuro, #rajjpatel, #disguisedtoast, #somagreen
-    'channels': ['#trainwreckstv', '#macaiyla', '#therealshookon3'],
+    # channel to join '#clawontwitch', #moonmoon_ow, #neuro, #rajjpatel, #disguisedtoast, #somagreen, #macaiyla,
+    #trainwreckstv
+    'channels': ['#clawontwitch','#moonmoon_ow','#badbunny', '#amouranth ', '#therealshookon3', '#stephenfra', '#sienne', '#beautiffal'],
 
     # if set to true will display any data received
     'debug': False,
