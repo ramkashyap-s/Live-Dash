@@ -1,10 +1,10 @@
 import psycopg2
-from src.config import databaseconfig
+from src.configuration import databaseconfig
 
 
 def insert_stats_list(stats_list):
     """ insert multiple vendors into the vendors table  """
-    sql = "INSERT INTO stats(channel_id, previous_time_window, metric_id, metric_value) " \
+    sql = "INSERT INTO stats(channel_name, time_window, metric_name, metric_value) " \
           "VALUES(%int, %timestamp, %int, %int)"
     conn = None
     try:

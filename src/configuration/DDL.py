@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import psycopg2
-from src.config import databaseconfig
+from src.configuration import databaseconfig
 
 def create_tables():
     """ create tables in the PostgreSQL database"""
@@ -19,11 +19,11 @@ def create_tables():
         """,
         """
         CREATE TABLE stats (
-                channel_id INTEGER NOT NULL,
-                previous_time_window TIMESTAMP NOT NULL,
-                metric_id INTEGER NOT NULL,
+                channel_name VARCHAR (50) NOT NULL,
+                time_window TIMESTAMP NOT NULL,
+                metric_name VARCHAR (50) NOT NULL,
                 metric_value INTEGER NOT NULL,  
-                PRIMARY KEY (channel_id, previous_time_window)                           
+                PRIMARY KEY (channel_name, time_window)                           
         )
         """
     )

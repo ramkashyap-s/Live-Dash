@@ -4,7 +4,7 @@ from configparser import ConfigParser
 def dbconfig(filename='database.ini', section='postgresql'):
     # create a parser
     parser = ConfigParser()
-    # read config file
+    # read configuration file
     parser.read(filename)
 
     # get section, default to postgresql

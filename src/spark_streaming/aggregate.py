@@ -33,7 +33,7 @@ if __name__ == "__main__":
     ss = SparkSession.builder.appName("twitch-stats").getOrCreate()
     sc = ss.sparkContext
     # sc = SparkContext(appName="twitch-stats")
-    #.config("spark.executor.cores", "4").config("spark.executor.memory", "4g")
+    #.configuration("spark.executor.cores", "4").configuration("spark.executor.memory", "4g")
     sc.setLogLevel("WARN")
     ssc = StreamingContext(sc, 60)
 

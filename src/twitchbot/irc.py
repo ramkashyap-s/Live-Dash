@@ -66,7 +66,7 @@ class irc:
 
         # find a way to check if authentication is successful
         # else:
-        #     print('Login unsuccessful. (hint: make sure your oauth token is set in self.config/self.conf.py).', 'error')
+        #     print('Login unsuccessful. (hint: make sure your oauth token is set in self.configuration/self.conf.py).', 'error')
         #     sys.exit()
 
         return self.sock

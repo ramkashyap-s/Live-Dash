@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import psycopg2
-from src.config import databaseconfig
+from src.configuration import databaseconfig
 
 
 def insert_metric(metric_name):

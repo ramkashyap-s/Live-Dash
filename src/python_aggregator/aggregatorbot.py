@@ -7,14 +7,10 @@ Adapted by Ram
 """
 
 from src.twitchbot import irc as irc_
-from kafka import KafkaProducer
-import json
 import time
-import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from collections import *
-import logging
-from src.database import DML_stats
+
 
 class ReaderBot:
 
@@ -44,14 +40,14 @@ class ReaderBot:
             elapsed_time = time.time() - start_time
             if elapsed_time > 10:
                 # reset start_time
+                print(list(num_user_interactions.items()))
+                print(list(num_comments.items()))
+                print("start new window")
                 user_counter = [Counter() for i in range(len(config['channels']))]
                 user_interactions = defaultdict(None, zip(config['channels'], user_counter))
                 num_comments = defaultdict(int)
                 num_user_interactions = defaultdict(int)
                 start_time = time.time()
-                print(list(num_user_interactions.items()))
-                print(list(num_comments.items()))
-                print("start new window")
 
 
             data = sock.recv(config['socket_buffer_size']).rstrip()
@@ -73,10 +69,11 @@ class ReaderBot:
                 num_user_interactions[message_dict['channel']] = \
                     (len(user_interactions.get(message_dict['channel'])))
 
+
                 # self.nltk_sentiment(message_dict['message'])
                 # channel_sentiment.get(message_dict['channel'], self.nltk_sentiment(message_dict['message']))
                 # print(message_dict['channel'], user_interactions.get(message_dict['channel']))
-                print(message_dict)
+                # print(message_dict)
                 # print(len(user_interactions.get(message_dict['channel'])))
                 # message = message_dict['message']
                 # username = message_dict['username']
