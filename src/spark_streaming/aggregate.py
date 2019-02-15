@@ -50,7 +50,7 @@ if __name__ == "__main__":
                         .option("subscribe", "twitch-message")\
                         .load()
     messageDF = messageDFRaw.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
-
+    messageDF.
     # messageDF = messageDF.select(from_json(messageDF.value, struct).alias("json")).collect()
 
     # messageDFRaw.selectExpr(from_json("CAST(value AS STRING)", struct))
@@ -124,6 +124,7 @@ if __name__ == "__main__":
         "sentiment",
         add_sentiment_grade_udf("score")
     )
+    messageDFcols = messageDF.select("value").toDF()
 
     messageDFSentimentCount = messageDF.select("sentiment") \
         .groupby("sentiment") \
