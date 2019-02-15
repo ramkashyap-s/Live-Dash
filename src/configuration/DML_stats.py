@@ -3,9 +3,9 @@ from src.configuration import databaseconfig
 
 
 def insert_stats_list(stats_list):
-    """ insert multiple vendors into the vendors table  """
+    """ insert multiple rows into the table  """
     sql = "INSERT INTO stats(channel_name, time_window, metric_name, metric_value) " \
-          "VALUES(%int, %timestamp, %int, %int)"
+          "VALUES(%string, %timestamp, %string, %int)"
     conn = None
     try:
         # read database configuration

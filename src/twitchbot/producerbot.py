@@ -42,7 +42,8 @@ class ProducerBot:
                 print(data)
 
             # check for ping, reply with pong
-            irc.check_for_ping(data)
+            # irc.check_for_ping(data)
+
 
             if irc.check_for_message(data):
                 message_dict = irc.get_message(data)
