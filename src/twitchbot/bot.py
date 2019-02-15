@@ -19,7 +19,7 @@ class TwitchBot:
         self.socket = self.irc.get_irc_socket_object()
         self.twitchtopic_producer = KafkaProducer(bootstrap_servers=config['kafka_config'],
                                                 api_version=(0, 10, 2), key_serializer=lambda m:str.encode(m),
-                                                value_serializer=lambda m: json.dumps(m).encode('utf-8'))
+                                                value_serializer=lambda m: str.encode(json.dumps(m)))
 
     # def on_send_success(record_metadata):
     #     print(record_metadata.topic)

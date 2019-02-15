@@ -7,7 +7,9 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
 import time
-
+# from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import nltk
 import json
 from afinn import Afinn
 from pyspark.sql.functions import *
@@ -29,24 +31,36 @@ if __name__ == "__main__":
     # port = sys.argv[2]
     # topic = sys.argv[3]
 
+    struct = StructType([
+        StructField("channel", StringType()),
+        StructField("username", StringType()),
+        StructField("message", StringType()),
+        StructField("time", StringType()),
+    ])
+
     spark = SparkSession\
         .builder\
-        .appName("TwitterSentimentAnalysis")\
+        .appName("TwitchCommentsAnalysis")\
         .getOrCreate()
 
     spark.sparkContext.setLogLevel("ERROR")
-
     messageDFRaw = spark.readStream\
                         .format("kafka")\
                         .option("kafka.bootstrap.servers", "localhost:9092")\
                         .option("subscribe", "twitch-message")\
                         .load()
-    # sqlContext.read.json(rdd)
-    # messageDF = messageDFRaw.selectExpr("value")
-    # messageDF = messageDFRaw.select(from_json(col("value").cast("string").schema))
-    # messageDF = messageDFRaw.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+    messageDF = messageDFRaw.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
 
-    messageDF = messageDFRaw.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING) as message")
+    # messageDF = messageDF.select(from_json(messageDF.value, struct).alias("json")).collect()
+
+    # messageDFRaw.selectExpr(from_json("CAST(value AS STRING)", struct))
+    # messageDF = messageDFRaw.toJSON()
+    # messageDF = messageDFRaw.selectExpr("CAST(value AS STRING) as message")
+
+    # messageDF = messageDFRaw.select(from_json(col("value").cast("string").schema))
+
+
+
     # messageDF = messageDF.selectExpr("message AS json")
     # print(messageDF.isStreaming)
     # print(messageDF.printSchema())
@@ -55,13 +69,30 @@ if __name__ == "__main__":
     # time.sleep(10)  # sleep 10 seconds
     # query.stop()
 
-    afinn = Afinn()
+    # messageDF = messageDFRaw.select("CAST(value AS STRING)")
+
+    # struct = StructType([
+    #     StructField("channel", StringType()),
+    #     StructField("username", StringType()),
+    #     StructField("message", StringType()),
+    #     StructField("time", StringType()),
+    # ])
+                    # .add("channel", StringType()) \
+                    # .add("username", StringType())  \
+                    # .add("message", StringType()) \
+                    # .add("time", TimestampType()) \
+    # messageDF = messageDFRaw.select(from_json(col("value").cast("string"), struct))
+    # messageNestedDf = messageDF.select(from_json("value", struct).as("message"))
+
+
+    # afinn = Afinn()
 
 
     def add_sentiment_score(text):
-
-        sentiment_score = afinn.score(text)
-        return sentiment_score
+        analyzer = SentimentIntensityAnalyzer()
+        sentiment_score = analyzer.polarity_scores(text)
+        # sentiment_score = afinn.score(text)
+        return sentiment_score['compound']
 
 
     add_sentiment_score_udf = udf(
@@ -71,7 +102,7 @@ if __name__ == "__main__":
 
     messageDF = messageDF.withColumn(
         "score",
-        add_sentiment_score_udf(messageDF.message)
+        add_sentiment_score_udf((messageDF.value))
     )
 
 
@@ -90,12 +121,12 @@ if __name__ == "__main__":
         StringType()
     )
     messageDF = messageDF.withColumn(
-        "grade",
+        "sentiment",
         add_sentiment_grade_udf("score")
     )
 
-    messageDFSentimentCount = messageDF.select("grade") \
-        .groupby("grade") \
+    messageDFSentimentCount = messageDF.select("sentiment") \
+        .groupby("sentiment") \
         .count()
 
     query = messageDF.writeStream \
