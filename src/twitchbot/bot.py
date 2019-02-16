@@ -19,7 +19,7 @@ class TwitchBot:
         self.socket = self.irc.get_irc_socket_object()
         self.twitchtopic_producer = KafkaProducer(bootstrap_servers=config['kafka_config'],
                                                 api_version=(0, 10, 2), key_serializer=lambda m:str.encode(m),
-                                                value_serializer=lambda m: json.dumps(m).encode('utf-8'))
+                                                value_serializer=lambda m: str.encode(json.dumps(m)))
 
     # def on_send_success(record_metadata):
     #     print(record_metadata.topic)
@@ -31,9 +31,10 @@ class TwitchBot:
         sock = self.socket
         config = self.config
 
+        # try:
         while True:
 
-            data = sock.recv(config['socket_buffer_size']).decode('utf-8',errors='ignore')
+            data = sock.recv(config['socket_buffer_size']).decode('utf-8', errors='ignore')
 
             if len(data) == 0:
                 print('Connection was lost, reconnecting.')
@@ -57,7 +58,11 @@ class TwitchBot:
                 # username = message_dict['username']
                 # self.chat_topic.send('new_chatmessage', str.encode(json.dumps(message_dict)))
                 self.twitchtopic_producer.send('twitch-message', key=channel, value=message_dict)
-                    # .add_callback(self.on_send_success)
+                # .add_callback(self.on_send_success)
+        # except KeyboardInterrupt:
+        #     pass
+
+
 
     #
     # def on_send_error(excp):
