@@ -10,7 +10,7 @@ config = {
 
     # channel to join '#clawontwitch', #moonmoon_ow, #neuro, #rajjpatel, #disguisedtoast,
     # #somagreen, #eevisu , #quarterjade
-    'channels': ['#clawontwitch', '#esl_csgo', '#ggria', '#amouranth'],
+    'channels': ['clawontwitch', 'esl_csgo', 'ggria', 'amouranth', 'overwatchleague'],
 
     # if set to true will display any data received
     'debug': False,

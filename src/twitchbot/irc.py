@@ -72,8 +72,8 @@ class irc:
         return self.sock
 
     def channels_to_string(self, channel_list):
-        # hash_prepended = list(map(lambda x: '#'+x, channel_list))
-        hash_prepended = list(map(lambda x: x, channel_list))
+        hash_prepended = list(map(lambda x: '#'+x, channel_list))
+        # hash_prepended = list(map(lambda x: x, channel_list))
         return ','.join(hash_prepended)
 
     def join_channels(self, channels):
