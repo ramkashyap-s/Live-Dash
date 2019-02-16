@@ -10,7 +10,7 @@ config = {
 
     # channel to join '#clawontwitch', #moonmoon_ow, #neuro, #rajjpatel, #disguisedtoast, #somagreen, #macaiyla,
     #trainwreckstv
-    'channels': ['ninja','clawontwitch','moonmoon_ow','badbunny', 'amouranth ', 'therealshookon3', 'stephenfra', 'sienne', 'beautiffal'],
+    'channels': ['overwatchleague','ninja','clawontwitch','moonmoon_ow','badbunny', 'amouranth ', 'therealshookon3', 'stephenfra', 'sienne', 'beautiffal'],
 
     # if set to true will display any data received
     'debug': False,
