@@ -10,8 +10,19 @@ config = {
 
     # channel to join '#clawontwitch', #moonmoon_ow, #neuro, #rajjpatel, #disguisedtoast, #somagreen, #macaiyla,
     #trainwreckstv
-    'channels': ['overwatchleague','ninja','clawontwitch','moonmoon_ow','badbunny', 'amouranth ', 'therealshookon3', 'stephenfra', 'sienne', 'beautiffal'],
-
+    # 'channels': ['overwatchleague','ninja','clawontwitch','moonmoon_ow','badbunny', 'amouranth ', 'therealshookon3', 'stephenfra', 'sienne', 'beautiffal'],
+    'channels' : ['ninja', 'shroud', 'meclipse', 'tsm_myth', 'tfue', 'summit1g', 'riotgames', 'timthetatman', 'dakotaz', 
+                  'tsm_daequan', 'drdisrespect', 'drlupo', 'syndicate', 'pokimane', 'esl_csgo', 'esltv_cs', 'imaqtpie', 
+                  'nightblue3', 'lirik', 'lirikk', 'sodapoppin', 'loltyler1', 'nickmercs', 'sypherpk', 'cdnthe3rd', 'fortnite', 
+                  'castro_1021', 'faker', 'theoriginalweed', 'joshog', 'Faceit', 'faceittv', 'eleaguetv', 'dyrus', 'gosu', 'dreamhackcs', 
+                  'wolves_bjergsen', 'tsm_bjergsen', 'officialbjergsen', 'boxbox', 'tsm_hamlinz', 'lolitofdez', 'alanzoka', 'electronicdesire', 
+                  'PhantomL0rd', 'goldglove', 'gdq', 'gamesdonequick', 'speeddemosarchivesda', 'sgdq', 'c9sneaky', 'gotaga', 'captainsparklez', 
+                  'montanablack88', 'yoda', 'stonedyooda', 'trick2g', 'nl_kripp', 'highdistortion', 'overwatchleague', 'kingrichard', 
+                  'doublelift_renamed300203', 'doublelift', 'cizzorz', 'swiftor', 'izakooo', 'couragejd', 'jericho', 'cohhcarnage', 'cohh', 
+                  'voyboy', 'bobross', 'sivhd', 'kittyplays', 'kittyplaysgames', 'jahrein', 'sovietwomble', 'thenadeshot', 'nadeshot', 
+                  'forsen', 'pewdiepie', 'anomaly', 'ungespielt', 'elded', 'dedreviil2', 'wtcn', 'gronkh', 'grimmmz', 'a_seagull', 'amaz', 
+                  'amazhs', 'pashabiceps', 'kinggothalion', 'tsm_theoddone', 'unlostv', 'markiplier', 'anomalyxd', 'disguisedtoast', 'xqcow', 
+                  'zeeoon'],
     # if set to true will display any data received
     'debug': False,
 
@@ -23,7 +34,7 @@ config = {
     'socket_buffer_size': 1024,
 
     # kafka config - for multiple kafka hosts use comma separated values
-    'kafka_config': ['localhost:9092'],
+    'kafka_config': ['ec2-34-236-252-14.compute-1.amazonaws.com:9092', 'ec2-52-73-58-213.compute-1.amazonaws.com:9092', 'ec2-100-26-19-202.compute-1.amazonaws.com:9092'],
 
     # Settings for app
 

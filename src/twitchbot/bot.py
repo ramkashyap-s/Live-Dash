@@ -46,14 +46,14 @@ class TwitchBot:
 
             # check for ping, reply with pong
             if data.startswith('PING'):
-                print(data)
+                #print(data)
                 sock.send("PONG\n".encode('utf-8'))
             # irc.check_for_ping(data)
 
             if irc.check_for_message(data):
                 message_dict = irc.get_message(data)
                 channel = message_dict['channel']
-                print(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + data)
+                #print(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + data)
                 # message = message_dict['message']
                 # username = message_dict['username']
                 # self.chat_topic.send('new_chatmessage', str.encode(json.dumps(message_dict)))
