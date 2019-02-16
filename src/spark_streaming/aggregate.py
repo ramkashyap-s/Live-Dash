@@ -31,7 +31,7 @@ if __name__ == "__main__":
     # port = sys.argv[2]
     # topic = sys.argv[3]
 
-    struct = StructType([
+    struct_schema = StructType([
         StructField("channel", StringType()),
         StructField("username", StringType()),
         StructField("message", StringType()),
@@ -49,11 +49,12 @@ if __name__ == "__main__":
                         .option("kafka.bootstrap.servers", "localhost:9092")\
                         .option("subscribe", "twitch-message")\
                         .load()
-    messageDF = messageDFRaw.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
-    messageDF.
-    # messageDF = messageDF.select(from_json(messageDF.value, struct).alias("json")).collect()
+    # messageDF = messageDFRaw.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+
+    messageDF = messageDFRaw.select(from_json(messageDFRaw.value, struct_schema).alias("json")).collect()
 
     # messageDFRaw.selectExpr(from_json("CAST(value AS STRING)", struct))
+
     # messageDF = messageDFRaw.toJSON()
     # messageDF = messageDFRaw.selectExpr("CAST(value AS STRING) as message")
 
@@ -124,7 +125,6 @@ if __name__ == "__main__":
         "sentiment",
         add_sentiment_grade_udf("score")
     )
-    messageDFcols = messageDF.select("value").toDF()
 
     messageDFSentimentCount = messageDF.select("sentiment") \
         .groupby("sentiment") \
