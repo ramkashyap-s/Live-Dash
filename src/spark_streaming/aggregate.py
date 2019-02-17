@@ -35,8 +35,10 @@ if __name__ == "__main__":
         StructField("channel", StringType()),
         StructField("username", StringType()),
         StructField("message", StringType()),
-        StructField("time", StringType()),
+        StructField("messagetime", StringType()),
+        StructField("viewers", StringType()),
     ])
+    # schema = StructType([StructField("channel", StringType())])
 
     spark = SparkSession\
         .builder\
@@ -47,13 +49,19 @@ if __name__ == "__main__":
     messageDFRaw = spark.readStream\
                         .format("kafka")\
                         .option("kafka.bootstrap.servers", "localhost:9092")\
-                        .option("subscribe", "twitch-message")\
+                        .option("subscribe", "twitch-parsed-message")\
                         .load()
-    # messageDF = messageDFRaw.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+    messageDF = messageDFRaw.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
 
-    messageDF = messageDFRaw.select(from_json(messageDFRaw.value, struct_schema).alias("json")).collect()
+    messageCastedDF = messageDF.select(from_json("value", struct_schema).alias("message"))
 
-    # messageDFRaw.selectExpr(from_json("CAST(value AS STRING)", struct))
+    messageFlattenedDF = messageCastedDF.selectExpr("message.channel", "message.username", "message.message",
+                                                    "message.messagetime", "message.viewers")
+
+    messageFlattenedDF = messageFlattenedDF.withColumn("messagetime",
+                                                       to_timestamp("messagetime"))
+
+    # messageDFRaw.selectExpr(from_json("CAST(value AS STRING)", struct_schema))
 
     # messageDF = messageDFRaw.toJSON()
     # messageDF = messageDFRaw.selectExpr("CAST(value AS STRING) as message")
@@ -66,28 +74,22 @@ if __name__ == "__main__":
     # print(messageDF.isStreaming)
     # print(messageDF.printSchema())
     # query = messageDF.writeStream.format("console").start()
-    #
     # time.sleep(10)  # sleep 10 seconds
     # query.stop()
 
+    print(messageDF.printSchema())
+
+    print(messageCastedDF.printSchema())
+
+    print(messageFlattenedDF.printSchema())
+
     # messageDF = messageDFRaw.select("CAST(value AS STRING)")
 
-    # struct = StructType([
-    #     StructField("channel", StringType()),
-    #     StructField("username", StringType()),
-    #     StructField("message", StringType()),
-    #     StructField("time", StringType()),
-    # ])
-                    # .add("channel", StringType()) \
-                    # .add("username", StringType())  \
-                    # .add("message", StringType()) \
-                    # .add("time", TimestampType()) \
     # messageDF = messageDFRaw.select(from_json(col("value").cast("string"), struct))
     # messageNestedDf = messageDF.select(from_json("value", struct).as("message"))
 
 
     # afinn = Afinn()
-
 
     def add_sentiment_score(text):
         analyzer = SentimentIntensityAnalyzer()
@@ -101,9 +103,9 @@ if __name__ == "__main__":
         FloatType()
     )
 
-    messageDF = messageDF.withColumn(
-        "score",
-        add_sentiment_score_udf((messageDF.value))
+    messageFlattenedDF = messageFlattenedDF.withColumn(
+        "sentiment_score",
+        add_sentiment_score_udf((messageFlattenedDF.message))
     )
 
 
@@ -121,16 +123,18 @@ if __name__ == "__main__":
         add_sentiment_grade,
         StringType()
     )
-    messageDF = messageDF.withColumn(
+    messageFlattenedDF = messageFlattenedDF.withColumn(
         "sentiment",
-        add_sentiment_grade_udf("score")
+        add_sentiment_grade_udf("sentiment_score")
     )
 
-    messageDFSentimentCount = messageDF.select("sentiment") \
+    messageDFSentimentCount = messageFlattenedDF.select("sentiment") \
         .groupby("sentiment") \
         .count()
 
-    query = messageDF.writeStream \
+
+
+    query = messageFlattenedDF.writeStream \
         .outputMode("append") \
         .format("console") \
         .option("truncate", "false") \
@@ -145,7 +149,6 @@ if __name__ == "__main__":
     #                                 .trigger(processingTime="5 seconds")\
     #                                 .start()\
     #                                 .awaitTermination()
-
 
 
 
