@@ -17,7 +17,7 @@ class TwitchBot:
         self.config = config
         self.irc = irc_.irc(config)
         self.socket = self.irc.get_irc_socket_object()
-        self.twitchtopic_producer = KafkaProducer(bootstrap_servers=config['kafka_config'],
+        self.twitchtopic_producer = KafkaProducer(bootstrap_servers=config['kafka_brokers'],
                                                 api_version=(0, 10, 2), key_serializer=lambda m:str.encode(m),
                                                 value_serializer=lambda m: str.encode(json.dumps(m)))
 

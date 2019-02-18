@@ -34,8 +34,10 @@ config = {
     'socket_buffer_size': 1024,
 
     # kafka config - for multiple kafka hosts use comma separated values
-    'kafka_config': ['localhost:9092'],
+    'kafka_brokers': ['localhost:9092'],
 
-    # Settings for app
+    'kafka_topic' : "twitch-parsed-message"
+
+# Settings for app
 
 }

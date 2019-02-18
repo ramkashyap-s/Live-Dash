@@ -6,6 +6,9 @@ import sys
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
+from pyspark.sql.types import NumericType
+import pyspark.sql.functions as func
+
 import time
 # from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -35,8 +38,8 @@ if __name__ == "__main__":
         StructField("channel", StringType()),
         StructField("username", StringType()),
         StructField("message", StringType()),
-        StructField("messagetime", StringType()),
-        StructField("viewers", StringType()),
+        StructField("timestamp", StringType()),
+        StructField("views", StringType()),
     ])
     # schema = StructType([StructField("channel", StringType())])
 
@@ -48,18 +51,22 @@ if __name__ == "__main__":
     spark.sparkContext.setLogLevel("ERROR")
     messageDFRaw = spark.readStream\
                         .format("kafka")\
-                        .option("kafka.bootstrap.servers", "localhost:9092")\
-                        .option("subscribe", "twitch-parsed-message")\
+                        .option("kafka.bootstrap.servers", 'localhost:9092')\
+                        .option("subscribe", "twitch-parsed-message") \
+                        .option("startingOffsets", "latest") \
                         .load()
+
     messageDF = messageDFRaw.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
 
     messageCastedDF = messageDF.select(from_json("value", struct_schema).alias("message"))
 
-    messageFlattenedDF = messageCastedDF.selectExpr("message.channel", "message.username", "message.message",
-                                                    "message.messagetime", "message.viewers")
+    message_flattened_DF = messageCastedDF.selectExpr("message.channel", "message.username", "message.message",
+                                                    "message.timestamp", "CAST(message.views AS LONG)")
 
-    messageFlattenedDF = messageFlattenedDF.withColumn("messagetime",
-                                                       to_timestamp("messagetime"))
+    message_flattened_DF = message_flattened_DF.withColumn("timestamp", to_timestamp("timestamp"))
+
+
+    # messageFlattenedDF = messageFlattenedDF.withWatermark("impressionTime", "60 seconds")
 
     # messageDFRaw.selectExpr(from_json("CAST(value AS STRING)", struct_schema))
 
@@ -76,12 +83,13 @@ if __name__ == "__main__":
     # query = messageDF.writeStream.format("console").start()
     # time.sleep(10)  # sleep 10 seconds
     # query.stop()
+    print(messageDFRaw.printSchema())
 
     print(messageDF.printSchema())
 
     print(messageCastedDF.printSchema())
 
-    print(messageFlattenedDF.printSchema())
+    print(message_flattened_DF.printSchema())
 
     # messageDF = messageDFRaw.select("CAST(value AS STRING)")
 
@@ -91,6 +99,7 @@ if __name__ == "__main__":
 
     # afinn = Afinn()
 
+    # function for sentiment score
     def add_sentiment_score(text):
         analyzer = SentimentIntensityAnalyzer()
         sentiment_score = analyzer.polarity_scores(text)
@@ -103,12 +112,12 @@ if __name__ == "__main__":
         FloatType()
     )
 
-    messageFlattenedDF = messageFlattenedDF.withColumn(
+    message_flattened_DF = message_flattened_DF.withColumn(
         "sentiment_score",
-        add_sentiment_score_udf((messageFlattenedDF.message))
+        add_sentiment_score_udf(message_flattened_DF.message)
     )
 
-
+    # function for sentiment grade
     def add_sentiment_grade(score):
 
         if score < 0:
@@ -123,18 +132,52 @@ if __name__ == "__main__":
         add_sentiment_grade,
         StringType()
     )
-    messageFlattenedDF = messageFlattenedDF.withColumn(
+    message_flattened_DF = message_flattened_DF.withColumn(
         "sentiment",
         add_sentiment_grade_udf("sentiment_score")
     )
+    # messageFlattenedDF.withWatermark("timestamp", "15 seconds")
 
-    messageDFSentimentCount = messageFlattenedDF.select("sentiment") \
+    windowed_user_counts = message_flattened_DF \
+                                     .withWatermark("timestamp", "15 seconds")\
+                                     .groupBy(
+                                            window("timestamp",
+                                                    "15 seconds",
+                                                    "5 seconds"),
+                                            "channel")\
+                                     .count()\
+                                     .orderBy("count", ascending=False)
+
+    windowed_view_counts = message_flattened_DF \
+                                     .withWatermark("timestamp", "15 seconds")\
+                                     .groupBy(
+                                            window("timestamp",
+                                                    "5 seconds",
+                                                    "1 seconds"),
+                                            "channel")\
+                                     .avg("views")
+
+    windowed_view_counts = windowed_view_counts.withColumn("avg(views)", func.round(windowed_view_counts["avg(views)"]))\
+                                           .withColumnRenamed("avg(views)", "views")
+
+    windowed_sentiment = message_flattened_DF \
+                                     .withWatermark("timestamp", "60 seconds") \
+                                     .where(message_flattened_DF["sentiment"] == "POSITIVE")\
+                                     .groupBy(
+                                            window("timestamp",
+                                                    "15 seconds",
+                                                    "5 seconds"),
+                                            "channel")\
+                                     .count()
+                                     # .orderBy("count", ascending=False)
+
+
+    # count by sentiment
+    messageDFSentimentCount = message_flattened_DF.select("sentiment") \
         .groupby("sentiment") \
         .count()
 
-
-
-    query = messageFlattenedDF.writeStream \
+    view_counts_query = windowed_view_counts.writeStream \
         .outputMode("append") \
         .format("console") \
         .option("truncate", "false") \

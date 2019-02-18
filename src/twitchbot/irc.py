@@ -38,8 +38,8 @@ class irc:
             'username': re.findall(r'^:([a-zA-Z0-9_]+)\!', data)[0],
             'message': re.findall(r'PRIVMSG #[a-zA-Z0-9_]+ :(.+)', data)[0],
             # 'messagetime': strftime("%Y-%m-%d %H:%M:%S", gmtime()),
-            'messagetime': str(datetime.now(timezone.utc).isoformat()),
-            'viewers': str(10000 + int(random.uniform(1000, 5000)))
+            'timestamp': str(datetime.now(timezone.utc).isoformat()),
+            'views': str(10000 + int(random.uniform(1000, 5000)))
         }
 
     def check_login_status(self, data):
