@@ -36,7 +36,7 @@ config = {
     'socket_buffer_size': 1024,
 
     # kafka config - for multiple kafka hosts use comma separated values
-    'kafka_config': ['ec2-34-192-244-108.compute-1.amazonaws.com:9092','ec2-34-236-252-14.compute-1.amazonaws.com:9092', 'ec2-52-73-58-213.compute-1.amazonaws.com:9092', 'ec2-100-26-19-202.compute-1.amazonaws.com:9092'],
+    'kafka_brokers': ['ec2-34-192-244-108.compute-1.amazonaws.com:9092','ec2-34-236-252-14.compute-1.amazonaws.com:9092', 'ec2-52-73-58-213.compute-1.amazonaws.com:9092', 'ec2-100-26-19-202.compute-1.amazonaws.com:9092'],
     'kafka_topic' : "twitch-parsed-message"
 
 # Settings for app
