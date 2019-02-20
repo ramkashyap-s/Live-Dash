@@ -1,7 +1,7 @@
 import socket, re, time, sys
 from time import gmtime, strftime
 import random
-
+from datetime import datetime, timezone
 class irc:
 
     def __init__(self, config):
@@ -36,7 +36,7 @@ class irc:
             'channel': re.findall(r'^:.+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+.+ PRIVMSG (.*?) :', data)[0],
             'username': re.findall(r'^:([a-zA-Z0-9_]+)\!', data)[0],
             'message': re.findall(r'PRIVMSG #[a-zA-Z0-9_]+ :(.+)', data)[0],
-            'time': strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+            'time': strftime(datetime.now(timezone.utc).isoformat()),
             'viewers': 10000 + int(random.uniform(100, 10000))
         }
 
