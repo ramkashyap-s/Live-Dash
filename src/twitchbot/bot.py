@@ -17,7 +17,7 @@ class TwitchBot:
         self.config = config
         self.irc = irc_.irc(config)
         self.socket = self.irc.get_irc_socket_object()
-        self.twitchtopic_producer = KafkaProducer(bootstrap_servers=config['kafka_config'],
+        self.twitchtopic_producer = KafkaProducer(bootstrap_servers=config['kafka_brokers'],
                                                 api_version=(0, 10, 2), key_serializer=lambda m:str.encode(m),
                                                 value_serializer=lambda m: str.encode(json.dumps(m)))
 
@@ -46,25 +46,11 @@ class TwitchBot:
 
             # check for ping, reply with pong
             if data.startswith('PING'):
-                #print(data)
                 sock.send("PONG\n".encode('utf-8'))
             # irc.check_for_ping(data)
 
             if irc.check_for_message(data):
                 message_dict = irc.get_message(data)
-                channel = message_dict['channel']
-                #print(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + data)
-                # message = message_dict['message']
-                # username = message_dict['username']
-                # self.chat_topic.send('new_chatmessage', str.encode(json.dumps(message_dict)))
+                channel = message_dict['channel_name']
                 self.twitchtopic_producer.send('twitch-message', key=channel, value=message_dict)
-                # .add_callback(self.on_send_success)
-        # except KeyboardInterrupt:
-        #     pass
 
-
-
-    #
-    # def on_send_error(excp):
-    #     log.error('I am an errback', exc_info=excp)
-    #     # handle exception
