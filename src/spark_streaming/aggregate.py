@@ -8,27 +8,24 @@ from pyspark.sql.functions import *
 from pyspark.sql.types import *
 from pyspark.sql.types import NumericType
 import pyspark.sql.functions as func
-# from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
-import nltk
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import json
-from afinn import Afinn
 from pyspark.sql.functions import *
 from pyspark.sql import DataFrame
 from pyspark.sql import streaming
 from six.moves import configparser
 
 def postgres_sink(df, epoch_id):
-    config = configparser.ConfigParser()
+    db_config = configparser.ConfigParser()
     if df.count() > 0:
         print("rows present")
-        df.show()
-        config.read('config.ini')
-        dbname = config.get('dbauth', 'dbname')
-        dbuser = config.get('dbauth', 'user')
-        dbpass = config.get('dbauth', 'password')
-        dbhost = config.get('dbauth', 'host')
-        dbport = config.get('dbauth', 'port')
+        # df.show()
+        db_config.read('config.ini')
+        dbname = db_config.get('dbauth', 'dbname')
+        dbuser = db_config.get('dbauth', 'user')
+        dbpass = db_config.get('dbauth', 'password')
+        dbhost = db_config.get('dbauth', 'host')
+        dbport = db_config.get('dbauth', 'port')
 
         url = "jdbc:postgresql://"+dbhost+":"+dbport+"/"+dbname
         properties = {
@@ -36,7 +33,7 @@ def postgres_sink(df, epoch_id):
             "user": dbuser,
             "password": dbpass
         }
-        print(properties)
+        # print(properties)
         mode = 'append'
         df.write.jdbc(url=url, table="stats", mode=mode,
                               properties=properties)
@@ -54,6 +51,10 @@ if __name__ == "__main__":
     # host = sys.argv[1]
     # port = sys.argv[2]
     # topic = sys.argv[3]
+    spark_config = configparser.ConfigParser()
+    spark_config.read('src/spark_streaming/config.ini')
+    kafka_brokers = spark_config.get('spark', 'kafka_brokers')
+    kafka_topic = spark_config.get('spark', 'kafka_topic')
 
     struct_schema = StructType([
         StructField("channel_name", StringType()),
@@ -68,12 +69,13 @@ if __name__ == "__main__":
         .builder\
         .appName("TwitchCommentsAnalysis")\
         .getOrCreate()
-
+    print(kafka_brokers)
+    print(kafka_topic)    
     spark.sparkContext.setLogLevel("ERROR")
     messageDFRaw = spark.readStream\
                         .format("kafka")\
-                        .option("kafka.bootstrap.servers", 'localhost:9092')\
-                        .option("subscribe", "twitch-parsed-message") \
+                        .option("kafka.bootstrap.servers", kafka_brokers)\
+                        .option("subscribe", kafka_topic) \
                         .option("startingOffsets", "latest") \
                         .load()
 
@@ -88,14 +90,14 @@ if __name__ == "__main__":
 
     print(messageDFRaw.printSchema())
 
-    print(messageDF.printSchema())
-
-    print(messageCastedDF.printSchema())
+    # print(messageDF.printSchema())
+    #
+    # print(messageCastedDF.printSchema())
 
     print(message_flattened_DF.printSchema())
 
 
-    # afinn = Afinn()
+
 
     # function for sentiment score
     def add_sentiment_score(text):
@@ -177,7 +179,7 @@ if __name__ == "__main__":
     windowed_message_count = windowed_message_count.selectExpr('window.end', 'channel_name', 'count')
     windowed_message_count = windowed_message_count.toDF('time_window', 'channel_name', 'metric_value')
     windowed_message_count = windowed_message_count.withColumn('metric_name', lit('num_comments'))
-    windowed_message_count.printSchema()
+    # windowed_message_count.printSchema()
 
 
 
@@ -201,7 +203,7 @@ if __name__ == "__main__":
     # rename columns to match database schema
     windowed_view_counts = windowed_view_counts.toDF('time_window', 'channel_name', 'metric_value')
     windowed_view_counts = windowed_view_counts.withColumn('metric_name', lit('num_views'))
-    windowed_view_counts.printSchema()
+    # windowed_view_counts.printSchema()
 
     # windowed_view_counts = windowed_view_counts.withColumn('time_window', )
 
@@ -226,7 +228,7 @@ if __name__ == "__main__":
     #     .trigger(processingTime="1 seconds") \
     #     .start()
 
-    spark.streams().awaitAnyTermination()
+    spark.streams.awaitAnyTermination()
 
     # view_counts_query = windowed_view_counts.writeStream \
     #     .outputMode("append") \
