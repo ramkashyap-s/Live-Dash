@@ -1,8 +1,7 @@
 import socket, re, time, sys
 from time import gmtime, strftime
-
-import random
 from datetime import datetime, timezone
+import random
 
 class irc:
 

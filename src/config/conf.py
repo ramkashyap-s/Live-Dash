@@ -10,6 +10,7 @@ config = {
 
     # channel to join '#clawontwitch', #moonmoon_ow, #neuro, #rajjpatel, #disguisedtoast, #somagreen, #macaiyla,
     #trainwreckstv
+<<<<<<< HEAD
 
     'channels': ['overwatchleague','ninja','clawontwitch','moonmoon_ow','badbunny', 'amouranth ', 'therealshookon3', 'stephenfra', 'sienne', 'beautiffal'],
     # 'channels' : ['ninja', 'shroud', 'meclipse', 'tsm_myth', 'tfue', 'summit1g', 'riotgames', 'timthetatman', 'dakotaz', 
