@@ -1,5 +1,5 @@
 import socket, re, time, sys
-from time import gmtime, strftime
+from datetime import datetime, timezone
 import random
 
 class irc:
@@ -33,11 +33,11 @@ class irc:
     def get_message(self, data):
         # ToDo Simulate number of viewers
         return {
-            'channel': re.findall(r'^:.+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+.+ PRIVMSG (.*?) :', data)[0],
+            'channel_name': re.findall(r'^:.+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+.+ PRIVMSG (.*?) :', data)[0],
             'username': re.findall(r'^:([a-zA-Z0-9_]+)\!', data)[0],
             'message': re.findall(r'PRIVMSG #[a-zA-Z0-9_]+ :(.+)', data)[0],
-            'time': strftime("%Y-%m-%d %H:%M:%S", gmtime()),
-            'viewers': 10000 + int(random.uniform(100, 10000))
+            'timestamp': str(datetime.now(timezone.utc).isoformat()),
+            'views': str(10000 + int(random.uniform(1000, 5000)))
         }
 
     def check_login_status(self, data):
@@ -78,7 +78,8 @@ class irc:
         return self.sock
 
     def channels_to_string(self, channel_list):
-        hash_prepended = list(map(lambda x: x, channel_list))
+        # hash_prepended = list(map(lambda x: x, channel_list))
+        hash_prepended = list(map(lambda x: '#'+x, channel_list))
         return ','.join(hash_prepended)
 
     def join_channels(self, channels):
