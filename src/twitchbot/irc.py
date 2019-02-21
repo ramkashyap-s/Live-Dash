@@ -37,7 +37,6 @@ class irc:
             'channel_name': re.findall(r'^:.+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+.+ PRIVMSG (.*?) :', data)[0],
             'username': re.findall(r'^:([a-zA-Z0-9_]+)\!', data)[0],
             'message': re.findall(r'PRIVMSG #[a-zA-Z0-9_]+ :(.+)', data)[0],
-            # 'messagetime': strftime("%Y-%m-%d %H:%M:%S", gmtime()),
             'timestamp': str(datetime.now(timezone.utc).isoformat()),
             'views': str(10000 + int(random.uniform(1000, 5000)))
         }

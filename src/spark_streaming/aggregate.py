@@ -21,9 +21,9 @@ from six.moves import configparser
 def postgres_sink(df, epoch_id):
     config = configparser.ConfigParser()
     if df.count() > 0:
-        print("rows present")
+        # print("rows present")
         df.show()
-        config.read('config.ini')
+        config.read('src/spark_streaming/config.ini')
         dbname = config.get('dbauth', 'dbname')
         dbuser = config.get('dbauth', 'user')
         dbpass = config.get('dbauth', 'password')
@@ -36,7 +36,7 @@ def postgres_sink(df, epoch_id):
             "user": dbuser,
             "password": dbpass
         }
-        print(properties)
+        # print(properties)
         mode = 'append'
         df.write.jdbc(url=url, table="stats", mode=mode,
                               properties=properties)
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     #     .trigger(processingTime="1 seconds") \
     #     .start()
 
-    spark.streams().awaitAnyTermination()
+    spark.streams.awaitAnyTermination()
 
     # view_counts_query = windowed_view_counts.writeStream \
     #     .outputMode("append") \
