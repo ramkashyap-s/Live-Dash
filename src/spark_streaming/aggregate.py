@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
 
     # if len(sys.argv) != 4:
-    #     print("Usage: spark-submit m03_demo04_tweetSentiment.py <hostname> <port> <topic>",
+    #     print("Usage: spark-submit name.py <hostname> <port> <topic>",
     #             file=sys.stderr)
     #     exit(-1)
     #
