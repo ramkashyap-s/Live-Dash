@@ -20,16 +20,10 @@ config = {
     #               'doublelift_renamed300203', 'doublelift', 'cizzorz', 'swiftor', 'izakooo', 'couragejd', 'jericho', 'cohhcarnage', 'cohh',
     #               'voyboy', 'bobross', 'sivhd', 'kittyplays', 'kittyplaysgames', 'jahrein', 'sovietwomble', 'thenadeshot', 'nadeshot',
     #               'forsen', 'pewdiepie', 'anomaly', 'ungespielt', 'elded', 'dedreviil2', 'wtcn', 'gronkh', 'grimmmz', 'a_seagull', 'amaz',
-    #               'amazhs', 'pashabiceps', 'kinggothalion', 'tsm_theoddone', 'unlostv', 'markiplier', 'anomalyxd', 'disguisedtoast', 'xqcow',
-    # channel to join '#clawontwitch', #moonmoon_ow, #neuro, #rajjpatel, #disguisedtoast, #somagreen, #macaiyla,
-    #trainwreckstv
+    #               'amazhs', 'pashabiceps', 'kinggothalion', 'tsm_theoddone', 'unlostv', 'markiplier', 'anomalyxd', 'disguisedtoast', 'xqcow']
 
     # if set to true will display any data received
     'debug': False,
-
-    # if set to true will log all messages from all channels
-    # todo
-    'log_messages': True,
 
     # maximum amount of bytes to receive from socket - 1024-4096 recommended
     'socket_buffer_size': 1024,
@@ -37,5 +31,5 @@ config = {
     # kafka config - for multiple kafka hosts use comma separated values
     'kafka_brokers': ['localhost:9092'],
     # kafka topic
-    'kafka_topic' : 'twitch-parsed-message'
+    'kafka_topic': 'twitch-parsed-message'
 }

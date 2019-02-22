@@ -5,6 +5,7 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from pyspark.sql.functions import *
 from six.moves import configparser
 
+# ToDO: move the functions into a class and refactor this file
 
 def postgres_sink(df, epoch_id):
     db_config = configparser.ConfigParser()
