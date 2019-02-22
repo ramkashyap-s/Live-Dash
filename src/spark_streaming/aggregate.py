@@ -1,21 +1,9 @@
-from pyspark import SparkContext
-from pyspark.streaming import StreamingContext
-from pyspark.streaming.kafka import KafkaUtils
-import sys
-import os
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import *
 from pyspark.sql.types import *
-from pyspark.sql.types import NumericType
 import pyspark.sql.functions as func
-# from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-import nltk
-import json
-from afinn import Afinn
 from pyspark.sql.functions import *
-from pyspark.sql import DataFrame
-from pyspark.sql import streaming
+
 from six.moves import configparser
 
 def postgres_sink(df, epoch_id):
@@ -41,13 +29,31 @@ def postgres_sink(df, epoch_id):
         df.write.jdbc(url=url, table="stats", mode=mode,
                               properties=properties)
 
+# function for sentiment score
+def add_sentiment_score(text):
+    analyzer = SentimentIntensityAnalyzer()
+    sentiment_score = analyzer.polarity_scores(text)
+    return sentiment_score['compound']
+
+
+# function for sentiment type
+def add_sentiment_type(score):
+
+    if score < 0:
+        return 'NEGATIVE'
+    elif score == 0:
+        return 'NEUTRAL'
+    else:
+        return 'POSITIVE'
+
+
 
 
 if __name__ == "__main__":
 
 
     # if len(sys.argv) != 4:
-    #     print("Usage: spark-submit m03_demo04_tweetSentiment.py <hostname> <port> <topic>",
+    #     print("Usage: spark-submit spark_aggregation.py <hostname> <port> <topic>",
     #             file=sys.stderr)
     #     exit(-1)
     #
@@ -86,24 +92,10 @@ if __name__ == "__main__":
 
     message_flattened_DF = message_flattened_DF.withColumn("timestamp", to_timestamp("timestamp"))
 
-    print(messageDFRaw.printSchema())
-
-    print(messageDF.printSchema())
-
-    print(messageCastedDF.printSchema())
-
-    print(message_flattened_DF.printSchema())
-
-
-    # afinn = Afinn()
-
-    # function for sentiment score
-    def add_sentiment_score(text):
-        analyzer = SentimentIntensityAnalyzer()
-        sentiment_score = analyzer.polarity_scores(text)
-        # sentiment_score = afinn.score(text)
-        return sentiment_score['compound']
-
+    # print(messageDFRaw.printSchema())
+    # print(messageDF.printSchema())
+    # print(messageCastedDF.printSchema())
+    # print(message_flattened_DF.printSchema())
 
     add_sentiment_score_udf = udf(
         add_sentiment_score,
@@ -115,19 +107,9 @@ if __name__ == "__main__":
         add_sentiment_score_udf(message_flattened_DF.message)
     )
 
-    # function for sentiment grade
-    def add_sentiment_grade(score):
-
-        if score < 0:
-            return 'NEGATIVE'
-        elif score == 0:
-            return 'NEUTRAL'
-        else:
-            return 'POSITIVE'
-
 
     add_sentiment_grade_udf = udf(
-        add_sentiment_grade,
+        add_sentiment_type,
         StringType()
     )
     message_flattened_DF = message_flattened_DF.withColumn(
@@ -139,12 +121,9 @@ if __name__ == "__main__":
                                      .withWatermark("timestamp", "10 seconds") \
                                      .where(message_flattened_DF["sentiment"] == "POSITIVE")\
                                      .groupBy(
-                                            window("timestamp",
-                                                    "5 seconds",
-                                                    "1 seconds"),
+                                            window("timestamp", "5 seconds", "1 seconds"),
                                             "channel_name")\
                                      .count()
-                                     # .orderBy("count", ascending=False)
 
     # rename columns to match database schema
     windowed_positive_count = windowed_positive_count.selectExpr('window.end', 'channel_name', 'count')
@@ -153,34 +132,23 @@ if __name__ == "__main__":
     windowed_positive_count = windowed_positive_count.withColumn('metric_name', lit('num_positive_comments'))
     windowed_positive_count.printSchema()
 
-
     # count by sentiment
     messageDFSentimentCount = message_flattened_DF.select("sentiment") \
         .groupby("sentiment") \
         .count()
 
-
-
-
     windowed_message_count = message_flattened_DF \
                                      .withWatermark("timestamp", "5 seconds")\
                                      .groupBy(
-                                            window("timestamp",
-                                                    "5 seconds",
-                                                    "1 seconds"),
+                                            window("timestamp", "5 seconds", "1 seconds"),
                                             "channel_name")\
                                      .count()
-                                     # .orderBy("count", ascending=False)
-
 
     # rename columns to match database schema
     windowed_message_count = windowed_message_count.selectExpr('window.end', 'channel_name', 'count')
     windowed_message_count = windowed_message_count.toDF('time_window', 'channel_name', 'metric_value')
     windowed_message_count = windowed_message_count.withColumn('metric_name', lit('num_comments'))
     windowed_message_count.printSchema()
-
-
-
 
     windowed_view_counts = message_flattened_DF \
                                      .withWatermark("timestamp", "5 seconds")\
@@ -195,16 +163,15 @@ if __name__ == "__main__":
                                                 .withColumnRenamed("avg(views)", "views")
 
     # windowed_view_counts.printSchema()
-
     # windowed_view_counts.printSchema()
+
+    # select and rename columns to match database schema
     windowed_view_counts = windowed_view_counts.selectExpr('window.end', 'channel_name', 'views')
-    # rename columns to match database schema
     windowed_view_counts = windowed_view_counts.toDF('time_window', 'channel_name', 'metric_value')
     windowed_view_counts = windowed_view_counts.withColumn('metric_name', lit('num_views'))
     windowed_view_counts.printSchema()
 
-    # windowed_view_counts = windowed_view_counts.withColumn('time_window', )
-
+    # query for counting number of messages
     message_count_query = windowed_message_count.writeStream \
         .outputMode("append") \
         .foreachBatch(postgres_sink) \
@@ -212,6 +179,7 @@ if __name__ == "__main__":
         .trigger(processingTime="1 seconds") \
         .start()
 
+    # query for counting number of positive messages
     positive_message_count_query = windowed_positive_count.writeStream \
         .outputMode("append") \
         .foreachBatch(postgres_sink) \
@@ -219,30 +187,5 @@ if __name__ == "__main__":
         .trigger(processingTime="1 seconds") \
         .start()
 
-    # view_counts_query = windowed_view_counts.writeStream \
-    #     .outputMode("append") \
-    #     .foreachBatch(postgres_sink) \
-    #     .option("truncate", "false") \
-    #     .trigger(processingTime="1 seconds") \
-    #     .start()
-
     spark.streams.awaitAnyTermination()
-
-    # view_counts_query = windowed_view_counts.writeStream \
-    #     .outputMode("append") \
-    #     .format("console") \
-    #     .option("truncate", "false") \
-    #     .trigger(processingTime="5 seconds") \
-    #     .start() \
-    #     .awaitTermination()
-
-
-    # query = messageDFSentimentCount.writeStream\
-    #                                 .outputMode("complete")\
-    #                                 .format("console")\
-    #                                 .option("truncate", "false")\
-    #                                 .trigger(processingTime="5 seconds")\
-    #                                 .start()\
-    #                                 .awaitTermination()
-
 

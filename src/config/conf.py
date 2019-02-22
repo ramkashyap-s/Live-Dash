@@ -8,8 +8,7 @@ config = {
     'username': 'srk3141', # your twitch username
     'oauth_password': 'oauth:stohe9j4evimw08quy46nm5htphllu',  # get this from http://twitchapps.com/tmi/
 
-    # channel to join '#clawontwitch', #moonmoon_ow, #neuro, #rajjpatel, #disguisedtoast, #somagreen, #macaiyla,
-    #trainwreckstv
+    # channel to join
     'channels': ['ninja','clawontwitch','moonmoon_ow','badbunny', 'amouranth ', 'therealshookon3', 'stephenfra', 'sienne', 'beautiffal'],
     # 'channels' : ['ninja', 'shroud', 'meclipse', 'tsm_myth', 'tfue', 'summit1g', 'riotgames', 'timthetatman', 'dakotaz',
     #               'tsm_daequan', 'drdisrespect', 'drlupo', 'syndicate', 'pokimane', 'esl_csgo', 'esltv_cs', 'imaqtpie',
@@ -23,6 +22,7 @@ config = {
     #               'forsen', 'pewdiepie', 'anomaly', 'ungespielt', 'elded', 'dedreviil2', 'wtcn', 'gronkh', 'grimmmz', 'a_seagull', 'amaz',
     #               'amazhs', 'pashabiceps', 'kinggothalion', 'tsm_theoddone', 'unlostv', 'markiplier', 'anomalyxd', 'disguisedtoast', 'xqcow',
     #               'zeeoon'],
+
     # if set to true will display any data received
     'debug': False,
 
@@ -37,7 +37,5 @@ config = {
     'kafka_brokers': ['localhost:9092'],
 
     'kafka_topic' : "twitch-parsed-message"
-
-# Settings for app
 
 }
