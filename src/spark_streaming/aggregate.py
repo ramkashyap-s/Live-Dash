@@ -1,22 +1,22 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 import pyspark.sql.functions as func
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from pyspark.sql.functions import *
-
 from six.moves import configparser
 
+
 def postgres_sink(df, epoch_id):
-    config = configparser.ConfigParser()
+    db_config = configparser.ConfigParser()
     if df.count() > 0:
-        # print("rows present")
-        df.show()
-        config.read('src/spark_streaming/config.ini')
-        dbname = config.get('dbauth', 'dbname')
-        dbuser = config.get('dbauth', 'user')
-        dbpass = config.get('dbauth', 'password')
-        dbhost = config.get('dbauth', 'host')
-        dbport = config.get('dbauth', 'port')
+        print("rows present")
+        # df.show()
+        db_config.read('config.ini')
+        dbname = db_config.get('dbauth', 'dbname')
+        dbuser = db_config.get('dbauth', 'user')
+        dbpass = db_config.get('dbauth', 'password')
+        dbhost = db_config.get('dbauth', 'host')
+        dbport = db_config.get('dbauth', 'port')
 
         url = "jdbc:postgresql://"+dbhost+":"+dbport+"/"+dbname
         properties = {
@@ -60,6 +60,10 @@ if __name__ == "__main__":
     # host = sys.argv[1]
     # port = sys.argv[2]
     # topic = sys.argv[3]
+    spark_config = configparser.ConfigParser()
+    spark_config.read('src/spark_streaming/config.ini')
+    kafka_brokers = spark_config.get('spark', 'kafka_brokers')
+    kafka_topic = spark_config.get('spark', 'kafka_topic')
 
     struct_schema = StructType([
         StructField("channel_name", StringType()),
@@ -74,12 +78,13 @@ if __name__ == "__main__":
         .builder\
         .appName("TwitchCommentsAnalysis")\
         .getOrCreate()
-
+    print(kafka_brokers)
+    print(kafka_topic)    
     spark.sparkContext.setLogLevel("ERROR")
     messageDFRaw = spark.readStream\
                         .format("kafka")\
-                        .option("kafka.bootstrap.servers", 'localhost:9092')\
-                        .option("subscribe", "twitch-parsed-message") \
+                        .option("kafka.bootstrap.servers", kafka_brokers)\
+                        .option("subscribe", kafka_topic) \
                         .option("startingOffsets", "latest") \
                         .load()
 
@@ -148,7 +153,7 @@ if __name__ == "__main__":
     windowed_message_count = windowed_message_count.selectExpr('window.end', 'channel_name', 'count')
     windowed_message_count = windowed_message_count.toDF('time_window', 'channel_name', 'metric_value')
     windowed_message_count = windowed_message_count.withColumn('metric_name', lit('num_comments'))
-    windowed_message_count.printSchema()
+    # windowed_message_count.printSchema()
 
     windowed_view_counts = message_flattened_DF \
                                      .withWatermark("timestamp", "5 seconds")\
@@ -169,7 +174,7 @@ if __name__ == "__main__":
     windowed_view_counts = windowed_view_counts.selectExpr('window.end', 'channel_name', 'views')
     windowed_view_counts = windowed_view_counts.toDF('time_window', 'channel_name', 'metric_value')
     windowed_view_counts = windowed_view_counts.withColumn('metric_name', lit('num_views'))
-    windowed_view_counts.printSchema()
+    # windowed_view_counts.printSchema()
 
     # query for counting number of messages
     message_count_query = windowed_message_count.writeStream \
@@ -188,4 +193,3 @@ if __name__ == "__main__":
         .start()
 
     spark.streams.awaitAnyTermination()
-

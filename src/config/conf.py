@@ -21,7 +21,8 @@ config = {
     #               'voyboy', 'bobross', 'sivhd', 'kittyplays', 'kittyplaysgames', 'jahrein', 'sovietwomble', 'thenadeshot', 'nadeshot',
     #               'forsen', 'pewdiepie', 'anomaly', 'ungespielt', 'elded', 'dedreviil2', 'wtcn', 'gronkh', 'grimmmz', 'a_seagull', 'amaz',
     #               'amazhs', 'pashabiceps', 'kinggothalion', 'tsm_theoddone', 'unlostv', 'markiplier', 'anomalyxd', 'disguisedtoast', 'xqcow',
-    #               'zeeoon'],
+    # channel to join '#clawontwitch', #moonmoon_ow, #neuro, #rajjpatel, #disguisedtoast, #somagreen, #macaiyla,
+    #trainwreckstv
 
     # if set to true will display any data received
     'debug': False,
@@ -35,7 +36,6 @@ config = {
 
     # kafka config - for multiple kafka hosts use comma separated values
     'kafka_brokers': ['localhost:9092'],
-
-    'kafka_topic' : "twitch-parsed-message"
-
+    # kafka topic
+    'kafka_topic' : 'twitch-parsed-message'
 }
