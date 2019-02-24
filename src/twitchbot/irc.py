@@ -39,12 +39,13 @@ class irc:
             self.sock.send('PONG'.encode('utf-8'))
 
     def get_message(self, data):
-        # ToDo Simulate number of viewers
+        # ToDo replace number of views with a rate limited API call
         return {
             'channel_name': re.findall(r'^:.+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+.+ PRIVMSG (.*?) :', data)[0],
             'username': re.findall(r'^:([a-zA-Z0-9_]+)\!', data)[0],
             'message': re.findall(r'PRIVMSG #[a-zA-Z0-9_]+ :(.+)', data)[0],
             'timestamp': str(datetime.now(timezone.utc).isoformat()),
+            # simulating the number of views
             'views': str(10000 + int(random.uniform(1000, 5000)))
         }
 
