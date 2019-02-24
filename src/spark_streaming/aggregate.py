@@ -4,6 +4,7 @@ import pyspark.sql.functions as func
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from pyspark.sql.functions import *
 from six.moves import configparser
+import os
 
 # ToDO: move the functions into a class and refactor this file
 
@@ -12,7 +13,8 @@ def postgres_sink(df, epoch_id):
     if df.count() > 0:
         print("rows present")
         # df.show()
-        db_config.read('config.ini')
+        path = '/home/' + os.getlogin() + '/Live-Dash/config.ini'
+	db_config.read(path)
         dbname = db_config.get('dbauth', 'dbname')
         dbuser = db_config.get('dbauth', 'user')
         dbpass = db_config.get('dbauth', 'password')
