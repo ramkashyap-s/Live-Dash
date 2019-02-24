@@ -14,7 +14,7 @@ def postgres_sink(df, epoch_id):
         print("rows present")
         # df.show()
         path = '/home/' + os.getlogin() + '/Live-Dash/config.ini'
-	db_config.read(path)
+	    db_config.read(path)
         dbname = db_config.get('dbauth', 'dbname')
         dbuser = db_config.get('dbauth', 'user')
         dbpass = db_config.get('dbauth', 'password')
