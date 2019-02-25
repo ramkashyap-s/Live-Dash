@@ -6,13 +6,14 @@ from time import gmtime, strftime
 
 class TwitchBot:
 
-    def __init__(self, config):
+    def __init__(self, config, topic):
         self.config = config
         self.irc = irc_.irc(config)
         self.socket = self.irc.get_irc_socket_object()
         self.twitchtopic_producer = KafkaProducer(bootstrap_servers=config['kafka_brokers'],
-                                                  api_version=(0, 10, 2), key_serializer=lambda m:str.encode(m),
+                                                  api_version=(0, 10, 1), key_serializer=lambda m:str.encode(m),
                                                   value_serializer=lambda m: str.encode(json.dumps(m)))
+        self.topic = topic
 
     def run(self):
         irc = self.irc
@@ -22,9 +23,8 @@ class TwitchBot:
         while True:
 
             data = sock.recv(config['socket_buffer_size']).decode('utf-8', errors='ignore').rstrip()
-
             if len(data) == 0:
-                print('Connection was lost, reconnecting.')
+                print(strftime("%Y-%m-%d %H:%M:%S", gmtime())+'Connection was lost, reconnecting.')
                 self.socket = self.irc.get_irc_socket_object()
 
             if config['debug']:
@@ -38,4 +38,4 @@ class TwitchBot:
             if irc.check_for_message(data):
                 message_dict = irc.get_message(data)
                 channel = message_dict['channel_name']
-                self.twitchtopic_producer.send('twitch-parsed-message', key=channel, value=message_dict)
+                self.twitchtopic_producer.send(self.topic, key=channel, value=message_dict)
