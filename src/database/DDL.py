@@ -7,24 +7,34 @@ def create_tables():
     commands = (
         """
         CREATE TABLE metrics(
-                metric_id serial PRIMARY KEY, 
-                metric_name VARCHAR (50) UNIQUE NOT NULL, 
+                metric_name VARCHAR (50) PRIMARY KEY, 
                 metric_desc VARCHAR (255) NOT NULL
                 )
         """,
         """ CREATE TABLE channels(
-                channel_id serial PRIMARY KEY, 
-                channel_name VARCHAR (50) UNIQUE NOT NULL
+                channel_name VARCHAR (50) PRIMARY KEY,
+                channel_meta text UNIQUE
                 )
         """,
         """
-        CREATE TABLE stats (
-                channel_name VARCHAR (50) NOT NULL,
-                time_window TIMESTAMP NOT NULL,
-                metric_name VARCHAR (50) NOT NULL,
-                metric_value INTEGER NOT NULL,  
-                PRIMARY KEY (channel_name, time_window)                           
-        )
+        create table stats
+                (
+                 metric_name varchar(50) not null
+                  constraint stats_metrics_metric_name_fk
+                   references metrics,
+                 metric_value integer not null,
+                 channel_name varchar(50) not null,
+                 start_time TIMESTAMP not null,
+                 end_time TIMESTAMP not null,
+                 epoch_id bigint,
+                 global_id BIGSERIAL,
+                 constraint stats_pk
+                  primary key (epoch_id, global_id)
+                );
+                create index stats_channel_name_index
+                 on stats (channel_name);
+                create index stats_end_time_index
+                 on stats (end_time);
         """
     )
     conn = None

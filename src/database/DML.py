@@ -1,11 +1,12 @@
+#!/usr/bin/python
 import psycopg2
 from src.configuration import databaseconfig
 
 
-def insert_stats_list(stats_list):
-    """ insert multiple rows into the table  """
-    sql = "INSERT INTO stats(channel_name, time_window, metric_name, metric_value) " \
-          "VALUES(%string, %timestamp, %string, %int)"
+def insert_metric(metric_name, metric_desc):
+    """ insert a new metric into the metrics table """
+    sql = """INSERT INTO metrics(metric_name, metric_desc)
+             VALUES(%s, %s);"""
     conn = None
     try:
         # read database configuration
@@ -15,7 +16,7 @@ def insert_stats_list(stats_list):
         # create a new cursor
         cur = conn.cursor()
         # execute the INSERT statement
-        cur.executemany(sql,stats_list)
+        cur.execute(sql, (metric_name, metric_desc))
         # commit the changes to the database
         conn.commit()
         # close communication with the database
@@ -25,3 +26,7 @@ def insert_stats_list(stats_list):
     finally:
         if conn is not None:
             conn.close()
+
+
+# if __name__ == '__main__':
+#     insert_metric('postgresql')
