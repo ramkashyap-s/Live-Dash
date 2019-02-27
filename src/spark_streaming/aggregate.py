@@ -11,10 +11,9 @@ import os
 def postgres_sink(df, epoch_id):
     db_config = configparser.ConfigParser()
     if df.count() > 0:
-        print("rows present")
         # df.show()
         path = '/home/' + os.getlogin() + '/Live-Dash/config.ini'
-	db_config.read(path)
+        db_config.read(path)
         dbname = db_config.get('dbauth', 'dbname')
         dbuser = db_config.get('dbauth', 'user')
         dbpass = db_config.get('dbauth', 'password')
@@ -27,7 +26,6 @@ def postgres_sink(df, epoch_id):
             "user": dbuser,
             "password": dbpass
         }
-        # print(properties)
         mode = 'append'
         df.write.jdbc(url=url, table="stats", mode=mode,
                               properties=properties)
@@ -49,25 +47,107 @@ def add_sentiment_type(score):
     else:
         return 'POSITIVE'
 
+# function for calculating number of comments grouped by channel
+def num_comments(df, time_window, sliding_interval, watermark):
+    windowed_message_count = df \
+                                 .withWatermark("timestamp", watermark)\
+                                 .groupBy(
+                                        window("timestamp", time_window, sliding_interval),
+                                        "channel_name")\
+                                 .count()
+
+    # rename columns to match database schema
+    windowed_message_count = windowed_message_count.selectExpr('window.end', 'channel_name', 'count')
+    windowed_message_count = windowed_message_count.toDF('time_window', 'channel_name', 'metric_value')
+    windowed_message_count = windowed_message_count.withColumn('metric_name', lit('num_comments'))
+
+    # query for counting number of messages and writing it into postgres
+    message_count_query = windowed_message_count.writeStream \
+        .outputMode("append") \
+        .foreachBatch(postgres_sink) \
+        .option("truncate", "false") \
+        .start()
+
+# function for calculating number of comments grouped by channel
+def num_views(df, time_window, sliding_interval, watermark):
+    windowed_view_counts = df \
+                             .withWatermark("timestamp", watermark)\
+                             .groupBy(
+                                    window("timestamp", time_window,sliding_interval),
+                                    "channel_name")\
+                             .avg("views")
+
+    windowed_view_counts = windowed_view_counts.withColumn("avg(views)", func.round(windowed_view_counts["avg(views)"]))\
+                                                .withColumnRenamed("avg(views)", "views")
+
+
+    # select and rename columns to match database schema
+    windowed_view_counts = windowed_view_counts.selectExpr('window.end', 'channel_name', 'views')
+    windowed_view_counts = windowed_view_counts.toDF('time_window', 'channel_name', 'metric_value')
+    windowed_view_counts = windowed_view_counts.withColumn('metric_name', lit('num_views'))
+
+
+    # query for counting number of positive messages
+    view_count_query = windowed_view_counts.writeStream \
+        .outputMode("append") \
+        .foreachBatch(postgres_sink) \
+        .option("truncate", "false") \
+        .start()
+
+
+# function for calculating number of positive comments grouped by channel
+def num_positive_comments(df, time_window, sliding_interval, watermark):
+    add_sentiment_score_udf = udf(
+        add_sentiment_score,
+        FloatType()
+    )
+
+    df = df.withColumn(
+        "sentiment_score",
+        add_sentiment_score_udf(df.message)
+    )
+
+
+    add_sentiment_grade_udf = udf(
+        add_sentiment_type,
+        StringType()
+    )
+    df = df.withColumn(
+        "sentiment",
+        add_sentiment_grade_udf("sentiment_score")
+    )
+
+    windowed_positive_count = df \
+                                 .withWatermark("timestamp", "10 seconds") \
+                                 .where(message_flattened_DF["sentiment"] == "POSITIVE")\
+                                 .groupBy(
+                                        window("timestamp", "5 seconds", "1 seconds"),
+                                        "channel_name")\
+                                 .count()
+
+    # rename columns to match database schema
+    windowed_positive_count = windowed_positive_count.selectExpr('window.end', 'channel_name', 'count')
+    windowed_positive_count = windowed_positive_count.toDF('time_window', 'channel_name', 'metric_value')
+    windowed_positive_count = windowed_positive_count.withColumn('metric_name', lit('num_positive_comments'))
+
+    # query for counting number of messages and writing it into postgres
+    message_count_query = windowed_positive_count.writeStream \
+        .outputMode("append") \
+        .foreachBatch(postgres_sink) \
+        .option("truncate", "false") \
+        .start()
 
 
 
 if __name__ == "__main__":
 
-
-    # if len(sys.argv) != 4:
-    #     print("Usage: spark-submit spark_aggregation.py <hostname> <port> <topic>",
-    #             file=sys.stderr)
-    #     exit(-1)
-    #
-    # host = sys.argv[1]
-    # port = sys.argv[2]
-    # topic = sys.argv[3]
     spark_config = configparser.ConfigParser()
-    spark_config.read('src/spark_streaming/config.ini')
+    path = '/home/' + os.getlogin() + '/Live-Dash/config.ini'
+    spark_config.read(path)
     kafka_brokers = spark_config.get('spark', 'kafka_brokers')
     kafka_topic = spark_config.get('spark', 'kafka_topic')
 
+    # define the schema for kafka messages
     struct_schema = StructType([
         StructField("channel_name", StringType()),
         StructField("username", StringType()),
@@ -75,14 +155,12 @@ if __name__ == "__main__":
         StructField("timestamp", StringType()),
         StructField("views", StringType()),
     ])
-    # schema = StructType([StructField("channel_name", StringType())])
 
     spark = SparkSession\
         .builder\
         .appName("TwitchCommentsAnalysis")\
         .getOrCreate()
-    print(kafka_brokers)
-    print(kafka_topic)    
+
     spark.sparkContext.setLogLevel("ERROR")
     messageDFRaw = spark.readStream\
                         .format("kafka")\
@@ -100,99 +178,8 @@ if __name__ == "__main__":
 
     message_flattened_DF = message_flattened_DF.withColumn("timestamp", to_timestamp("timestamp"))
 
-    # print(messageDFRaw.printSchema())
-    # print(messageDF.printSchema())
-    # print(messageCastedDF.printSchema())
-    # print(message_flattened_DF.printSchema())
-
-    add_sentiment_score_udf = udf(
-        add_sentiment_score,
-        FloatType()
-    )
-
-    message_flattened_DF = message_flattened_DF.withColumn(
-        "sentiment_score",
-        add_sentiment_score_udf(message_flattened_DF.message)
-    )
-
-
-    add_sentiment_grade_udf = udf(
-        add_sentiment_type,
-        StringType()
-    )
-    message_flattened_DF = message_flattened_DF.withColumn(
-        "sentiment",
-        add_sentiment_grade_udf("sentiment_score")
-    )
-
-    windowed_positive_count = message_flattened_DF \
-                                     .withWatermark("timestamp", "10 seconds") \
-                                     .where(message_flattened_DF["sentiment"] == "POSITIVE")\
-                                     .groupBy(
-                                            window("timestamp", "5 seconds", "1 seconds"),
-                                            "channel_name")\
-                                     .count()
-
-    # rename columns to match database schema
-    windowed_positive_count = windowed_positive_count.selectExpr('window.end', 'channel_name', 'count')
-    column_schema = ['time_window', 'channel_name', 'num_positive_comments']
-    windowed_positive_count = windowed_positive_count.toDF('time_window', 'channel_name', 'metric_value')
-    windowed_positive_count = windowed_positive_count.withColumn('metric_name', lit('num_positive_comments'))
-    windowed_positive_count.printSchema()
-
-    # count by sentiment
-    messageDFSentimentCount = message_flattened_DF.select("sentiment") \
-        .groupby("sentiment") \
-        .count()
-
-    windowed_message_count = message_flattened_DF \
-                                     .withWatermark("timestamp", "5 seconds")\
-                                     .groupBy(
-                                            window("timestamp", "5 seconds", "1 seconds"),
-                                            "channel_name")\
-                                     .count()
-
-    # rename columns to match database schema
-    windowed_message_count = windowed_message_count.selectExpr('window.end', 'channel_name', 'count')
-    windowed_message_count = windowed_message_count.toDF('time_window', 'channel_name', 'metric_value')
-    windowed_message_count = windowed_message_count.withColumn('metric_name', lit('num_comments'))
-    # windowed_message_count.printSchema()
-
-    windowed_view_counts = message_flattened_DF \
-                                     .withWatermark("timestamp", "5 seconds")\
-                                     .groupBy(
-                                            window("timestamp",
-                                                    "5 seconds",
-                                                    "1 seconds"),
-                                            "channel_name")\
-                                     .avg("views")
-
-    windowed_view_counts = windowed_view_counts.withColumn("avg(views)", func.round(windowed_view_counts["avg(views)"]))\
-                                                .withColumnRenamed("avg(views)", "views")
-
-    # windowed_view_counts.printSchema()
-    # windowed_view_counts.printSchema()
-
-    # select and rename columns to match database schema
-    windowed_view_counts = windowed_view_counts.selectExpr('window.end', 'channel_name', 'views')
-    windowed_view_counts = windowed_view_counts.toDF('time_window', 'channel_name', 'metric_value')
-    windowed_view_counts = windowed_view_counts.withColumn('metric_name', lit('num_views'))
-    # windowed_view_counts.printSchema()
-
-    # query for counting number of messages
-    message_count_query = windowed_message_count.writeStream \
-        .outputMode("append") \
-        .foreachBatch(postgres_sink) \
-        .option("truncate", "false") \
-        .trigger(processingTime="1 seconds") \
-        .start()
-
-    # query for counting number of positive messages
-    positive_message_count_query = windowed_positive_count.writeStream \
-        .outputMode("append") \
-        .foreachBatch(postgres_sink) \
-        .option("truncate", "false") \
-        .trigger(processingTime="1 seconds") \
-        .start()
+    num_positive_comments(message_flattened_DF, 5, 1, 5)
+    num_comments(message_flattened_DF, 5, 1, 5)
+    num_views(message_flattened_DF, 5, 1, 5)
 
     spark.streams.awaitAnyTermination()

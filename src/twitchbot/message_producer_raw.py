@@ -1,6 +1,6 @@
 from src.twitchbot import irc as irc_
 from kafka import KafkaProducer
-import json
+import re
 from time import gmtime, strftime
 
 
@@ -12,7 +12,7 @@ class RawBot:
         self.socket = self.irc.get_irc_socket_object()
         self.twitchtopic_producer = KafkaProducer(bootstrap_servers=config['kafka_brokers'],
                                                   api_version=(0, 10, 1), key_serializer=lambda m:str.encode(m),
-                                                  value_serializer=lambda m: str.encode(json.dumps(m)))
+                                                  value_serializer=lambda m: str.encode(m))
         self.topic = topic
 
     def run(self):
@@ -36,9 +36,10 @@ class RawBot:
 
             # extract data and send it to kafka broker
             try:
-                #message_dict = irc.get_message(data)
-                #channel = message_dict['channel_name']
+                #extract channel name and send it as key to the partition
                 channel = re.findall(r'^:.+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+.+ PRIVMSG (.*?) :', data)[0]
-                self.twitchtopic_producer.send(self.topic, key = channel, value=message_dict)
+                self.twitchtopic_producer.send(self.topic, key=channel, value=data)
             except:
+                # ToDO setup a logging framework
+                # ToDo Check for known exceptions
                 pass

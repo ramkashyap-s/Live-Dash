@@ -1,5 +1,5 @@
 # Live-Dash
-Stream processing pipeline for analyzing live chat data
+Stream processing pipeline for analyzing live chat data from Twitch IRC
 
 ## Architecture
 ![Alt text](docs/pipeline.png "Architecture")
