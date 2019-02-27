@@ -1,7 +1,5 @@
 """
-Simple IRC Bot for Twitch.tv
-
-Developed by Aidan Thomson <aidraj0@gmail.com>
+Simple IRC Bot for Twitch.tv by Aidan Thomson <aidraj0@gmail.com>
 
 Modified and Adapted by Ram
 """
@@ -39,13 +37,13 @@ class irc:
             self.sock.send('PONG'.encode('utf-8'))
 
     def get_message(self, data):
-        # ToDo replace number of views with a rate limited API call
         return {
             'channel_name': re.findall(r'^:.+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+.+ PRIVMSG (.*?) :', data)[0],
             'username': re.findall(r'^:([a-zA-Z0-9_]+)\!', data)[0],
             'message': re.findall(r'PRIVMSG #[a-zA-Z0-9_]+ :(.+)', data)[0],
+            # event time
             'timestamp': str(datetime.now(timezone.utc).isoformat()),
-            # simulating the number of views
+            # simulating the number of views rate limited API call
             'views': str(10000 + int(random.uniform(1000, 5000)))
         }
 
