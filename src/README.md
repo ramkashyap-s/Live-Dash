@@ -2,8 +2,6 @@
 
 ##### To use kafka from Python install this package
 - pip install kafka-python
-##### To use json like format - here used for kafka ingestion
-- pip install msgpack
 
 ##### To install dependencies
 pip install -r </path/to/requirements.txt>
