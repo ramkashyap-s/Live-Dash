@@ -12,6 +12,6 @@ Live-Dash runs a pipeline on the AWS cloud, using the following cluster configur
 - 1 t2.medium Web-Server
 
 ## Setup
-- I used pegasus to spin up my clusters. You might want to use [the following](src/README.md)
+- I used pegasus to spin up my clusters. You might want to read [the following](src/README.md)
 to setup the enviornment on your localhost to test this out. 
 

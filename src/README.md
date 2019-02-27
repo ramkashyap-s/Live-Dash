@@ -12,8 +12,7 @@ pip install -r </path/to/requirements.txt>
 - Follow instructions: https://kafka.apache.org/quickstart
 
 ## Spark installation (local) version 2.4.0
-Download from: http://www.apache.org/dyn/closer.lua/apache-spark-2.4.0-bin.tar.gz
-
+Download and follow instructions from https://spark.apache.org/downloads.html
 # Dash / Flask
 - pip install dash==0.27.0
 - pip install dash-html-components==0.13.2
