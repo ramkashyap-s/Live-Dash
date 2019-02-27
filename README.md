@@ -2,7 +2,7 @@
 Stream processing pipeline for analyzing live chat data from Twitch IRC
 
 ## Architecture
-![Alt text](docs/pipeline.png "Architecture")
+![Alt text](src/docs/pipeline.png "Architecture")
 
 Live-Dash runs on the AWS cloud, using the following cluster configurations:
 
