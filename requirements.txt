@@ -38,10 +38,10 @@ numpy==1.16.1
 pandas==0.24.1
 psycopg2==2.7.7
 py4j==0.10.4
-pyspark==2.1.2
+pyspark==2.4.0
 pyspark-stubs==2.4.0.post1
 python-dateutil==2.8.0
-kafka==1.4.4
+kafka-python==1.4.4
 pytz==2018.9
 regex==2019.2.5
 requests==2.21.0

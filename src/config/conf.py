@@ -6,11 +6,10 @@ config = {
     # details required to login to twitch IRC server
     'server': 'irc.twitch.tv',
     'port': 6667,
-    'username': 'srk3141', # your twitch username
-    'oauth_password': 'oauth:stohe9j4evimw08quy46nm5htphllu',  # get this from http://twitchapps.com/tmi/
+    'username': '<get-username-from-twitch>', # your twitch username
+    'oauth_password': '<get-key-from-twitch>',  # get this from http://twitchapps.com/tmi/
 
     # channel to join
-    #'channels': ['ninja','clawontwitch','moonmoon_ow','badbunny', 'amouranth ', 'therealshookon3', 'stephenfra', 'sienne', 'beautiffal'],
     'channels': ['esl_csgo', 'overwatchleague', 'lolitofdez', 'riotgames', 'rubius', 'csruhub', 'eleaguetv', 'mongraal', 'dizzy', 'sodapoppin',
                  'overwatchleague_fr', 'rocketleague', 'magic', 'gaules', 'warcraft', 'mrsavagem', 'lirik', 'unrivaledtournaments', 'zeko', 'drlupo',
                  'yassuo', 'mvg_league', 'stray228', 'elwind', 'cohhcarnage', 'santidead', 'esamarathon', 'starladder_hs_ru', 'elded', 'esl_dota2',
@@ -96,7 +95,7 @@ config = {
     'socket_buffer_size': 4096,
 
     # kafka config - for multiple kafka hosts use comma separated values
-    'kafka_brokers': ['ec2-34-238-227-208.compute-1.amazonaws.com:9092','ec2-54-88-241-106.compute-1.amazonaws.com:9092','ec2-18-233-115-30.compute-1.amazonaws.com:9092'],
+    'kafka_brokers': ['localhost:9092'],
     # kafka topic
     'kafka_topic': 'twitch-parsed-message'
 }
