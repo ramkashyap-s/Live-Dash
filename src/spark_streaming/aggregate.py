@@ -11,6 +11,7 @@ import os
 def postgres_sink(df, epoch_id):
     db_config = configparser.ConfigParser()
     if df.count() > 0:
+        print("rows are present")
         # df.show()
         path = '/home/' + os.getlogin() + '/Live-Dash/config.ini'
         db_config.read(path)
@@ -20,6 +21,7 @@ def postgres_sink(df, epoch_id):
         dbhost = db_config.get('dbauth', 'host')
         dbport = db_config.get('dbauth', 'port')
 
+        df = df.withColumn('epoch_id', lit(epoch_id))
         url = "jdbc:postgresql://"+dbhost+":"+dbport+"/"+dbname
         properties = {
             "driver": "org.postgresql.Driver",
@@ -29,6 +31,9 @@ def postgres_sink(df, epoch_id):
         mode = 'append'
         df.write.jdbc(url=url, table="stats", mode=mode,
                               properties=properties)
+    else:
+        print("rows are not present")
+
 
 # function for sentiment score
 def add_sentiment_score(text):
@@ -107,7 +112,6 @@ def num_positive_comments(df, time_window, sliding_interval, watermark):
         add_sentiment_score_udf(df.message)
     )
 
-
     add_sentiment_grade_udf = udf(
         add_sentiment_type,
         StringType()
@@ -118,10 +122,10 @@ def num_positive_comments(df, time_window, sliding_interval, watermark):
     )
 
     windowed_positive_count = df \
-                                 .withWatermark("timestamp", "10 seconds") \
-                                 .where(message_flattened_DF["sentiment"] == "POSITIVE")\
+                                 .withWatermark("timestamp", watermark) \
+                                 .where(df["sentiment"] == "POSITIVE")\
                                  .groupBy(
-                                        window("timestamp", "5 seconds", "1 seconds"),
+                                        window("timestamp", time_window, sliding_interval),
                                         "channel_name")\
                                  .count()
 
@@ -138,12 +142,13 @@ def num_positive_comments(df, time_window, sliding_interval, watermark):
         .start()
 
 
-
 if __name__ == "__main__":
 
     spark_config = configparser.ConfigParser()
-    path = '/home/' + os.getlogin() + '/Live-Dash/config.ini'
+    # path = '/home/' + os.getlogin() + '/Live-Dash/config.ini'
+    path = 'config.ini'
     spark_config.read(path)
+    print(path)
     kafka_brokers = spark_config.get('spark', 'kafka_brokers')
     kafka_topic = spark_config.get('spark', 'kafka_topic')
 
@@ -156,12 +161,15 @@ if __name__ == "__main__":
         StructField("views", StringType()),
     ])
 
+    # define starting point for spark session
     spark = SparkSession\
         .builder\
         .appName("TwitchCommentsAnalysis")\
         .getOrCreate()
 
     spark.sparkContext.setLogLevel("ERROR")
+
+    # subscribe to topic and read from kafka brokers
     messageDFRaw = spark.readStream\
                         .format("kafka")\
                         .option("kafka.bootstrap.servers", kafka_brokers)\
@@ -178,8 +186,8 @@ if __name__ == "__main__":
 
     message_flattened_DF = message_flattened_DF.withColumn("timestamp", to_timestamp("timestamp"))
 
-    num_positive_comments(message_flattened_DF, 5, 1, 5)
-    num_comments(message_flattened_DF, 5, 1, 5)
-    num_views(message_flattened_DF, 5, 1, 5)
+    num_positive_comments(message_flattened_DF, "10 seconds", "5 seconds", "1 second")
+    num_comments(message_flattened_DF, "10 seconds", "5 seconds", "1 second")
+    num_views(message_flattened_DF, "10 seconds", "5 seconds", "1 second")
 
     spark.streams.awaitAnyTermination()
