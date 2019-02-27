@@ -2,8 +2,8 @@
 
 CLUSTER_NAME=elastic-cluster
 
-peg up $PRJ_DIR_DLIVE/setup/elasticsearch/master.yml &
-peg up $PRJ_DIR_DLIVE/setup/elasticsearch/workers.yml &
+peg up $DLIVE_PRJ_DIR_/setup/elasticsearch/master.yml &
+peg up $DLIVE_PRJ_DIR_/setup/elasticsearch/workers.yml &
 wait
 
 peg fetch ${CLUSTER_NAME}

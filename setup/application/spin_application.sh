@@ -2,7 +2,7 @@
 
 CLUSTER_NAME=application-cluster
 
-peg up $PRJ_DIR_DLIVE/setup/application/master.yml &
+peg up $DLIVE_PRJ_DIR_/setup/application/master.yml &
 
 wait
 
