@@ -17,4 +17,6 @@ Download and follow instructions from https://spark.apache.org/downloads.html
 - For step by step guide follow from here https://digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-18-04
 
 ## Send messages to broker
-- After starting zookeeper and kafka, 
+- After starting zookeeper and kafka, run
+```python3 run_bot```
+to start sending messages to kafka broker 

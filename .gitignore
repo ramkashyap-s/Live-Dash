@@ -1,5 +1,6 @@
 *.html
 src/spark_streaming/config.ini
+src/config/conf.py
 *.ini
 #.gitignore
 # Byte-compiled / optimized / DLL files
