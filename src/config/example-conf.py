@@ -1,18 +1,14 @@
 import pickle
 global config
-import os
-
-curr_path = os.path.dirname(os.path.abspath(__file__))
-file_path = os.path.join(curr_path, 'channel_list.txt')
-channel_list = open(file_path, "rb")
+channel_list = open("channel_list.txt", "rb")
 
 config = {
 
     # details required to login to twitch IRC server
     'server': 'irc.twitch.tv',
     'port': 6667,
-    'username': 'srk3141', # your twitch username
-    'oauth_password': 'oauth:stohe9j4evimw08quy46nm5htphllu',  # get this from http://twitchapps.com/tmi/
+    'username': '<get-username-from-twitch>', # your twitch username
+    'oauth_password': '<get-key-from-twitch>',  # get this from http://twitchapps.com/tmi/
 
     # channel to join
     'channels': pickle.load(channel_list),

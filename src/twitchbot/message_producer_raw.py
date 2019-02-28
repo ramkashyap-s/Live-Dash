@@ -36,12 +36,11 @@ class RawBot(Thread):
             if data.startswith('PING'):
                 sock.send("PONG\n".encode('utf-8'))
 
-            # extract data and send it to kafka broker
-            try:
-                #extract channel name and send it as key to the partition
-                channel = re.findall(r'^:.+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+.+ PRIVMSG (.*?) :', data)[0]
-                self.twitchtopic_producer.send(self.topic, key=channel, value=data)
-            except:
-                # ToDO setup a logging framework
-                # ToDo Check for known exceptions
-                pass
+            # extract channel name and send it as key to the broker
+            # send unprocessed data to the broker
+            channel = re.findall(r'^:.+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+.+ PRIVMSG (.*?) :', data)[0]
+            self.twitchtopic_producer.send(self.topic, key=channel, value=data)
+
+            # ToDO setup logging
+            # ToDo check for known exceptions
+            # ToDO Implement stop method for this class
