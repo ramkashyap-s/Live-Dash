@@ -10,6 +10,7 @@ import os
 
 def postgres_sink(df, epoch_id):
     db_config = configparser.ConfigParser()
+    df.show()
     if df.count() > 0:
         print("rows are present")
         # df.show()
