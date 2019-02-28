@@ -9,7 +9,7 @@ spark-submit \
 /src/spark_streaming/aggregate.py
 
 # for submitting spark application to master
-#spark-submit \
-#--packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0,org.postgresql:postgresql:42.2.5  \
-#--master spark://<hostname>:7077
-#/src/spark_streaming/aggregate.py
+spark-submit \
+--packages org.apache.spark:spark-sql-kafka-0-10_2.11:2.4.0,org.postgresql:postgresql:42.2.5  \
+--master spark://<hostname>:7077
+/src/spark_streaming/aggregate.py
