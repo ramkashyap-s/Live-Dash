@@ -2,7 +2,6 @@ import pickle
 global config
 channel_list = open("channel_list.txt", "rb")
 
-
 config = {
 
     # details required to login to twitch IRC server
@@ -12,7 +11,7 @@ config = {
     'oauth_password': '<get-key-from-twitch>',  # get this from http://twitchapps.com/tmi/
 
     # channel to join
-    'channels': pickle.load(channel_list).read().split(','),
+    'channels': pickle.load(channel_list),
 
          # if set to true will display any data received
     'debug': False,

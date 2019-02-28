@@ -2,11 +2,13 @@ from src.twitchbot import irc as irc_
 from kafka import KafkaProducer
 import re
 from time import gmtime, strftime
+from threading import Thread
 
 
-class RawBot:
+class RawBot(Thread):
 
     def __init__(self, config, topic):
+        Thread.__init__(self)
         self.config = config
         self.irc = irc_.irc(config)
         self.socket = self.irc.get_irc_socket_object()

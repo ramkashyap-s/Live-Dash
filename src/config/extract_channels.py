@@ -1,11 +1,14 @@
 # from bs4 import BeautifulSoup as bs
 from lxml import etree
 import pickle
+import os
 
+curr_path = os.path.dirname(os.path.abspath(__file__))
+my_file = os.path.join(curr_path, 'TopChannelsTwitch.html')
 
-url='TopChannelsTwitch.html'
+# url='TopChannelsTwitch.html'
 
-with open(url, "r") as f:
+with open(my_file, "r") as f:
     page = f.read()
     data = etree.HTML(page)
     anchor = data.xpath('//a[@data-test-selector="preview-card-titles__primary-link"]')

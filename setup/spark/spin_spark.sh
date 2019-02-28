@@ -2,8 +2,8 @@
 
 CLUSTER_NAME=spark-cluster
 
-peg up $DLIVE_PRJ_DIR_/setup/spark/master.yml &
-peg up $DLIVE_PRJ_DIR_/setup/spark/workers.yml &
+peg up $DLIVE_PRJ_DIR/setup/spark/master.yml &
+peg up $DLIVE_PRJ_DIR/setup/spark/workers.yml &
 wait
 
 peg fetch ${CLUSTER_NAME}

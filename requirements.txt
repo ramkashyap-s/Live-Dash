@@ -10,13 +10,6 @@ colorlog==4.0.2
 configparser==3.7.1
 contextvars==2.3
 croniter==0.3.27
-dash==0.36.0
-dash-api-python-client==0.1.0
-dash-core-components==0.43.0
-dash-daq==0.1.0
-dash-html-components==0.13.5
-dash-renderer==0.17.0
-dash-table==3.3.0
 decorator==4.3.2
 Flask==1.0.2
 Flask-Compress==1.4.0
