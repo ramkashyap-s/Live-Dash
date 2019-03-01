@@ -2,10 +2,10 @@ from six.moves import configparser
 import psycopg2
 
 
-class DatabaseOperations():
+class DatabaseOperations:
 
     def __init__(self):
-        config = configparser.ConfigParser().read('config.ini')
+        config = configparser.ConfigParser().read('database.ini')
         self.db_name = config.get('dbauth', 'dbname')
         self.db_user = config.get('dbauth', 'user')
         self.db_pass = config.get('dbauth', 'password')
@@ -28,7 +28,10 @@ class DatabaseOperations():
     def get_cursor(self):
         return self.cursor
 
-    def run_query(self, query):
+    def get_connection(self):
+        return self.conn
+
+    def read(self, query):
         try:
             result = self.cursor.execute(query)
         except Exception as error:

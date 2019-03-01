@@ -14,7 +14,8 @@ def postgres_sink(df, epoch_id):
     if df.count() > 0:
         print("rows are present")
         # df.show()
-        path = '/home/' + os.getlogin() + '/Live-Dash/config.ini'
+        # path = '/home/' + os.getlogin() + '/Live-Dash/config.ini'
+        path = '/home/' + os.getlogin() + '/dash-live/config.ini'
         db_config.read(path)
         dbname = db_config.get('dbauth', 'dbname')
         dbuser = db_config.get('dbauth', 'user')

@@ -2,11 +2,11 @@
 from lxml import etree
 import pickle
 import os
+import urllib
 
 curr_path = os.path.dirname(os.path.abspath(__file__))
 my_file = os.path.join(curr_path, 'TopChannelsTwitch.html')
 
-# url='TopChannelsTwitch.html'
 
 with open(my_file, "r") as f:
     page = f.read()
