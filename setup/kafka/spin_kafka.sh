@@ -2,8 +2,8 @@
 
 CLUSTER_NAME=elastic-cluster
 
-peg up $DLIVE_PRJ_DIR/setup/elasticsearch/master.yml &
-peg up $DLIVE_PRJ_DIR/setup/elasticsearch/workers.yml &
+peg up $DLIVE_PRJ_DIR/setup/kafka/master.yml &
+peg up $DLIVE_PRJ_DIR/setup/kafka/workers.yml &
 wait
 
 peg fetch ${CLUSTER_NAME}
