@@ -7,7 +7,7 @@ wait
 echo "completed $CLUSTER_NAME"
 
 # spin up kafka cluster
-source $DLIVE_PRJ_DIR/setup/elasticsearch/spin-kafka.sh
+source $DLIVE_PRJ_DIR/setup/kafka/spin-kafka.sh
 
 wait
 echo "completed $CLUSTER_NAME"
