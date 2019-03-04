@@ -11,10 +11,11 @@ import os
 def postgres_sink(df, epoch_id):
     db_config = configparser.ConfigParser()
     if df.count() > 0:
-        print("rows present")
+        #print("rows present")
         # df.show()
+        df =  df.withColumn('epoch_id', lit(epoch_id))
         path = '/home/' + os.getlogin() + '/Live-Dash/config.ini'
-	db_config.read(path)
+        db_config.read(path)
         dbname = db_config.get('dbauth', 'dbname')
         dbuser = db_config.get('dbauth', 'user')
         dbpass = db_config.get('dbauth', 'password')
@@ -75,15 +76,14 @@ if __name__ == "__main__":
         StructField("timestamp", StringType()),
         StructField("views", StringType()),
     ])
-    # schema = StructType([StructField("channel_name", StringType())])
 
     spark = SparkSession\
         .builder\
-        .appName("TwitchCommentsAnalysis")\
+        .appName("TwitchLiveStats")\
+        .config("spark.executor.memory", "6gb") \
         .getOrCreate()
-    print(kafka_brokers)
-    print(kafka_topic)    
-    spark.sparkContext.setLogLevel("ERROR")
+
+    spark.sparkContext.setLogLevel("WARN")
     messageDFRaw = spark.readStream\
                         .format("kafka")\
                         .option("kafka.bootstrap.servers", kafka_brokers)\
@@ -134,9 +134,9 @@ if __name__ == "__main__":
                                      .count()
 
     # rename columns to match database schema
-    windowed_positive_count = windowed_positive_count.selectExpr('window.end', 'channel_name', 'count')
+    windowed_positive_count = windowed_positive_count.selectExpr('window.start','window.end', 'channel_name', 'count')
     column_schema = ['time_window', 'channel_name', 'num_positive_comments']
-    windowed_positive_count = windowed_positive_count.toDF('time_window', 'channel_name', 'metric_value')
+    windowed_positive_count = windowed_positive_count.toDF('start_time', 'end_time', 'channel_name', 'metric_value')
     windowed_positive_count = windowed_positive_count.withColumn('metric_name', lit('num_positive_comments'))
     windowed_positive_count.printSchema()
 
@@ -153,8 +153,8 @@ if __name__ == "__main__":
                                      .count()
 
     # rename columns to match database schema
-    windowed_message_count = windowed_message_count.selectExpr('window.end', 'channel_name', 'count')
-    windowed_message_count = windowed_message_count.toDF('time_window', 'channel_name', 'metric_value')
+    windowed_message_count = windowed_message_count.selectExpr('window.start', 'window.end', 'channel_name', 'count')
+    windowed_message_count = windowed_message_count.toDF('start_time','end_time', 'channel_name', 'metric_value')
     windowed_message_count = windowed_message_count.withColumn('metric_name', lit('num_comments'))
     # windowed_message_count.printSchema()
 
@@ -174,8 +174,8 @@ if __name__ == "__main__":
     # windowed_view_counts.printSchema()
 
     # select and rename columns to match database schema
-    windowed_view_counts = windowed_view_counts.selectExpr('window.end', 'channel_name', 'views')
-    windowed_view_counts = windowed_view_counts.toDF('time_window', 'channel_name', 'metric_value')
+    windowed_view_counts = windowed_view_counts.selectExpr('window.start','window.end', 'channel_name', 'views')
+    windowed_view_counts = windowed_view_counts.toDF('start_time', 'end_time', 'channel_name', 'metric_value')
     windowed_view_counts = windowed_view_counts.withColumn('metric_name', lit('num_views'))
     # windowed_view_counts.printSchema()
 
@@ -184,7 +184,6 @@ if __name__ == "__main__":
         .outputMode("append") \
         .foreachBatch(postgres_sink) \
         .option("truncate", "false") \
-        .trigger(processingTime="1 seconds") \
         .start()
 
     # query for counting number of positive messages
@@ -192,7 +191,6 @@ if __name__ == "__main__":
         .outputMode("append") \
         .foreachBatch(postgres_sink) \
         .option("truncate", "false") \
-        .trigger(processingTime="1 seconds") \
         .start()
 
     spark.streams.awaitAnyTermination()
