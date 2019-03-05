@@ -1,16 +1,19 @@
 from six.moves import configparser
 import psycopg2
-
+import os
 
 class DatabaseOperations:
 
     def __init__(self):
-        config = configparser.ConfigParser().read('database.ini')
-        self.db_name = config.get('dbauth', 'dbname')
-        self.db_user = config.get('dbauth', 'user')
-        self.db_pass = config.get('dbauth', 'password')
-        self.db_host = config.get('dbauth', 'host')
-        self.db_port = config.get('dbauth', 'port')
+        db_config = configparser.ConfigParser()
+        # path = '/home/ram/PycharmProjects/dash-live/config.ini'
+        path = '/home/' + os.getlogin() + '/Live-Dash/config.ini'
+        db_config.read(path)
+        self.db_name = db_config.get('dbauth', 'dbname')
+        self.db_user = db_config.get('dbauth', 'user')
+        self.db_pass = db_config.get('dbauth', 'password')
+        self.db_host = db_config.get('dbauth', 'host')
+        self.db_port = db_config.get('dbauth', 'port')
 
         self.conn_properties = {
             "user": self.db_user,
