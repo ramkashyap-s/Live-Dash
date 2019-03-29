@@ -28,9 +28,9 @@ to setup the enviornment on your localhost to test this out.
 
 ## UI (Still there is lots of room for improvement!)
 
-![Alt text](src/docs/positive_comments.gif "Number of positive comments over time")
+![Alt text](/positive_comments.gif "Number of positive comments over time")
 
-![Alt text](src/docs/Peek_num_interactions_vs_time.gif "Number of user interactions over time")
+![Alt text](/Peek_num_interactions_vs_time.gif "Number of user interactions over time")
 	
 
 
