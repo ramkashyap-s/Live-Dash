@@ -2,7 +2,7 @@
 Stream processing pipeline for analyzing live chat data from Twitch IRC
 
 ## Providing actionable insights to live streamers
-- Live video channels receive thousands of messages every minute and tt is difficult to read and make sense of these messages 
+- Live video channels receive thousands of messages every minute and it is difficult to read and make sense of these messages 
 
 ![Alt text](src/docs/chat_section_small.gif "LiveChat")
 
