@@ -1,6 +1,17 @@
 # Live-Dash
 Stream processing pipeline for analyzing live chat data from Twitch IRC
 
+## Providing actionable insights to live streamers
+- Live video channels receive thousands of messages every minute and tt is difficult to read and make sense of these messages 
+
+![Alt text](src/docs/chat_section_small.gif "LiveChat")
+
+- This project aims to create a dashboard to help streamers identify insights 
+- This can help streamers in identifying the audience engagement 
+
+
+
+
 ## Architecture
 ![Alt text](src/docs/pipeline.png "Architecture")
 
@@ -14,4 +25,12 @@ Live-Dash runs on the AWS cloud, using the following cluster configurations:
 ## Setup
 - I used pegasus to spin up my clusters. You might want to read [the following](src/README.md)
 to setup the enviornment on your localhost to test this out. 
+
+## UI (Still there is lots of room for improvement!)
+
+![Alt text](src/docs/positive_comments.gif "Number of positive comments over time")
+
+![Alt text](src/docs/Peek_num_interactions_vs_time.gif "Number of user interactions over time")
+	
+
 
