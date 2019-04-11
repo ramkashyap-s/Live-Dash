@@ -32,4 +32,3 @@ to setup the enviornment on your localhost to test this out.
 
 ![Alt text](/Peek_num_interactions_vs_time.gif "Number of user interactions over time")
 	
-Presentation: https://docs.google.com/presentation/d/1INdVuo4dWy8_kH3LWE4OG17gV1afsJEOIk5Sf8z17dE/edit?usp=sharing
