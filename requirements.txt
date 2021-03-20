@@ -17,7 +17,7 @@ idna==2.8
 idna-ssl==1.1.0
 immutables==0.6
 itsdangerous==1.1.0
-Jinja2==2.10
+Jinja2==2.11.3
 jsonschema==2.6.0
 kafka-python==1.4.4
 MarkupSafe==1.1.0
