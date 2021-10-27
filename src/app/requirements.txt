@@ -6,7 +6,7 @@ dash-core-components==0.21.0
 dash-html-components==0.8.0
 dash-renderer==0.11.3
 dash==0.28.5
-dask==0.15.0
+dask==2021.10.0
 decorator==4.0.11
 enum34==1.1.6
 flask-cors
